@@ -1,0 +1,16 @@
+{% extends 'core/base.html' %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3">
+                <h1>Available Strategies</h1>
+                <ul>
+                    {% for strategy in strategies %}
+                        <li><a href="{{ strategy['link'] }}">{{ strategy['name'] }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-lg-8">main</div>
+        </div>
+    </div>
+{% endblock %}

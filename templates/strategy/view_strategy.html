@@ -1,0 +1,104 @@
+{% extends 'core/base.html' %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3">
+                <h1>{{ strategy.name }}</h1>
+                <div class="btn btn-success w-100">Run</div>
+                <div class="mt-3">
+                    <label>Dataset</label>
+                    <select class="form-control">
+                        {% for dataset in datasets %}
+                            <option value="{{ dataset.id }}">{{ dataset.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-9">
+                <h1>Chart</h1>
+                <div id="chart"></div>
+                <h1>Trades</h1>
+                <div>stuff</div>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        // fetch data
+        async function getOhlcv() {
+            // make ajax request
+            const response = await fetch('/api/v1/data?name=AAPL');
+            // parse json
+            const data = await response.json();
+            // return data
+            return data.map(d => {
+                return {
+                    datetime: new Date(d.datetime),
+                    open: d.open,
+                    high: d.high,
+                    low: d.low,
+                    close: d.close,
+                    volume: d.volume
+                }
+            });
+
+        }
+
+        function unpack(rows, key) {
+            return rows.map(function (row) {
+                return row[key];
+            });
+        }
+
+        // create chart
+        async function createChart() {
+            const ohlc = await getOhlcv()
+
+            var trace = {
+                x: unpack(ohlc, 'datetime'),
+                close: unpack(ohlc, 'close'),
+                high: unpack(ohlc, 'high'),
+                low: unpack(ohlc, 'low'),
+                open: unpack(ohlc, 'open'),
+
+                // cutomise colors
+                increasing: {line: {color: 'green'}},
+                decreasing: {line: {color: 'red'}},
+
+                type: 'ohlc',
+                xaxis: 'x',
+                yaxis: 'y'
+            };
+
+
+            var data = [trace];
+
+            console.log(trace)
+
+
+            var layout = {
+                dragmode: 'zoom',
+                margin: {
+                    r: 10,
+                    t: 25,
+                    b: 40,
+                    l: 60
+                },
+                showlegend: false,
+                xaxis: {
+                    autorange: true,
+                    title: 'Date',
+                    type: 'date'
+                },
+                yaxis: {
+                    autorange: true,
+                    type: 'linear'
+                }
+            };
+
+            Plotly.newPlot('chart', data, layout);
+        }
+
+        createChart()
+    </script>
+{% endblock %}
