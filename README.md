@@ -9,8 +9,7 @@ a python-based framework for creating and testing trading strategies
 ```python
 class SMACrossOverStrategy(Strategy):
     data = OHLCV().from_csv('storage/data/ohlcv/AAPL.csv')
-    sma_slow = []
-    sma_fast = []
+    sma_slow, sma_fast = [], []
 
     @before
     def set_sma(self):
@@ -21,8 +20,9 @@ class SMACrossOverStrategy(Strategy):
     @runner
     def run(self, parameters):
         idx = self.get_idx()
-        if self.sma_fast[idx] > self.sma_slow[idx] and self.sma_fast[idx - 1] < self.sma_slow[idx - 1]:
-            # create a buy order, everytime our fast sma crosses over our slow sma
+        cross_up = self.sma_fast[idx] > self.sma_slow[idx]
+        last_under = self.sma_fast[idx - 1] < self.sma_slow[idx - 1]
+        if cross_up and last_under:
             self.create_order(order_type='market', side='buy', quantity=1)
 
 ```
@@ -50,8 +50,9 @@ class SMACrossOverStrategy(Strategy):
     @runner
     def run(self, parameters):
         idx = self.get_idx()
-        if self.sma_fast[idx] > self.sma_slow[idx] and self.sma_fast[idx - 1] < self.sma_slow[idx - 1]:
-            # create a buy order, everytime our fast sma crosses over our slow sma
+        cross_up = self.sma_fast[idx] > self.sma_slow[idx]
+        last_under = self.sma_fast[idx - 1] < self.sma_slow[idx - 1]
+        if cross_up and last_under:
             self.create_order(order_type='market', side='buy', quantity=1)
 
     # after the strategy is run, do stuff :)
