@@ -12,9 +12,15 @@ class OHLCVManager:
                 return dataset
         return None
 
+    def get_new_dataset(self, name):
+        """Gets a dataset by name."""
+        for d in self.datasets:
+            if d.__name__ == name:
+                return d()
+        return None
+
 
 class OHLCV(list):
-
     manager = OHLCVManager
 
     def __init__(self):
@@ -24,6 +30,9 @@ class OHLCV(list):
         self._idx = 0
         self.name = None
         self.manager.datasets.append(self)
+
+    def reset(self):
+        self._idx = 0
 
     def get_index(self):
         return self._idx

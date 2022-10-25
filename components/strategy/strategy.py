@@ -5,6 +5,8 @@ from loguru import logger
 
 import inspect
 
+from components.strategy.position import Order, BasicPosition
+
 
 def get_decorators(method):
     """Gets decorators of a method"""
@@ -58,6 +60,9 @@ def runner(func):
                 logger.debug(f'Running {cls.name}.{m}')
                 getattr(cls, m)()
 
+        # reset the index of the data
+        cls.data.reset()
+
     return wrapper
 
 
@@ -84,12 +89,12 @@ def before(func):
 class Parameter:
     """Parameter class for strategies."""
 
-    def __init__(self, name, value, min_value=0, max_value=9999, step=1):
-        self.name = name
-        self.value = value
+    def __init__(self, default, min_value=0, max_value=9999, step=1, alias=None):
+        self.default = default
         self.min_value = min_value
         self.max_value = max_value
         self.step = step
+        self.alias = alias
 
 
 class Plot(list):
@@ -119,53 +124,24 @@ class Plot(list):
         self[:] = [self._try_round(x, decimals) for x in self]
 
 
-class Order:
-    def __init__(
-            self,
-            order_type: str = 'market',
-            side: str = 'none',
-            quantity: float = 1,
-            price: float = None,
-            timestamp: int = None,
-            data_index: int = None
-    ):
-        self.side = side
-        self.order_type = order_type
-        self.quantity = quantity
-        self.price = price
-        self.timestamp = datetime.datetime.fromtimestamp(timestamp / 1000) if timestamp else None
-        self.data_index = data_index
-        self.validate()
-
-    def validate(self):
-        if self.side.lower() not in ['buy', 'sell']:
-            raise Exception(f'Invalid order type {self.order_type}.  Must be buy or sell.')
-        if self.order_type.lower() not in ['market', 'limit', 'stop']:
-            raise Exception(f'Invalid order type {self.order_type}.  Must be market or limit.')
-        if self.quantity <= 0:
-            raise Exception(f'Invalid amount {self.quantity}.  Must be greater than 0.')
-        if self.order_type != 'market' and self.price <= 0:
-            raise Exception(f'Invalid price {self.price}.  Must be greater than 0.')
-        if self.timestamp is None:
-            raise Exception(f'Invalid timestamp {self.timestamp}.  Must be greater than 0.')
-
-    def __repr__(self):
-        return f'{self.order_type} {self.side} {self.quantity}{f" @ {self.price}" if self.price else ""} ({self.timestamp})[{self.data_index}]'
-
-
 class OrderManager:
     def __init__(self):
         self.orders = []
 
 
+class PositionManager:
+    def __init__(self):
+        self.positions = []
+
+
 class StrategyManager:
     strategies = []
 
-    def get_strategy(self, name: str):
+    def get_new_strategy(self, name: str):
         """Gets a strategy by name."""
         for s in self.strategies:
-            if s.name == name:
-                return s
+            if s.__name__ == name:
+                return s()
         return None
 
 
@@ -189,20 +165,43 @@ class Strategy:
 
     def __init__(self):
         self.order_manager = OrderManager()
+        self.position_manager = PositionManager()
         self.backtest = Backtest()
-        self.strategy_manager.strategies.append(self)
+        self.strategy_manager.strategies.append(self.__class__)
         self.name = self.__class__.__name__
         logger.debug(f'Initialized {self.name}')
 
     def create_order(self, order_type, side, quantity, price=None):
-        o = Order(order_type, side, quantity, price, timestamp=self.data.datetime(), data_index=self.data.get_index())
+        if price is None:
+            price = round(self.data[self.data.get_index()]['close'], 2)
+        o = Order(order_type, side, quantity, price=price, timestamp=self.data.datetime(),
+                  data_index=self.data.get_index())
         return self.submit_order(o)
+
+    def create_basic_position(self, order_type, side, quantity, price=None, take_profit=None, take_loss=None):
+        if price is None:
+            price = round(self.data[self.data.get_index()]['close'], 2)
+        p = BasicPosition(
+            order_type=order_type,
+            side=side,
+            quantity=quantity,
+            price=price,
+            timestamp=self.data.datetime(),
+            data_index=self.data.get_index(),
+            take_profit=round(take_profit, 2) if take_profit is not None else None,
+            take_loss=round(take_loss, 2) if take_loss is not None else None,
+        )
+        return self.submit_position(p)
 
     def orders(self):
         return self.order_manager.orders
 
     def submit_order(self, order):
         self.order_manager.orders.append(order)
+        return 0
+
+    def submit_position(self, position):
+        self.position_manager.positions.append(position)
         return 0
 
     def get_idx(self):

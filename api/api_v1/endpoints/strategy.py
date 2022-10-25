@@ -16,7 +16,7 @@ class Parameters(BaseModel):
 @router.post("/orders")
 async def get_orders(name: str, parameters: Parameters):
     """Gets the orders for a strategy."""
-    strategy = sm.get_strategy(name)
+    strategy = sm.get_new_strategy(name)
     if strategy:
         strategy.run({})
         strategy.backtest.run()

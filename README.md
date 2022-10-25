@@ -34,5 +34,4 @@ class SMACrossOverStrategy(Strategy):
     def run_backtest(self):
         # get the results of the strategy, _only_ running the strategy produces orders, but does not test them
         self.backtest.run()
-
 ```

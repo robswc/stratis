@@ -16,7 +16,7 @@ async def view_all_strategies(request: Request):
     strategies = []
     # request all strategies from strategy manager
     for strategy in sm.strategies:
-        strategies.append({'name': strategy.name, 'link': f'/ui/v1/strategy/{strategy.name}'})
+        strategies.append({'name': strategy.__name__, 'link': f'/ui/v1/strategy/{strategy.__name__}'})
 
     return templates.TemplateResponse(
         name="strategy/view_all.html",
@@ -28,8 +28,13 @@ async def view_all_strategies(request: Request):
 
 
 @router.get("/{strategy_name}")
-async def view_strategy(request: Request, strategy_name: str):
-    strategy = sm.get_strategy(strategy_name)
+async def view_strategy(request: Request, strategy_name: str, ohlcv_name: str = None):
+    strategy = sm.get_new_strategy(strategy_name)
+    print('STRATEGY ->', id(strategy))
+    if ohlcv_name:
+        ohlcv = OHLCVManager().get_dataset(ohlcv_name)
+        strategy.data = ohlcv
+        strategy.run({})
 
     dm = OHLCVManager()
 

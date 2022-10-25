@@ -17,8 +17,64 @@
             <div class="col-lg-9">
                 <h1>Chart</h1>
                 <div id="chart"></div>
-                <h1>Trades</h1>
-                <div>stuff</div>
+                <h1>Orders</h1>
+                <details>
+                    <summary><span class="font-bold">Total ({{ strategy.order_manager.orders | length }})</span>
+                    </summary>
+                    {% if strategy.orders %}
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Side</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Time</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for order in strategy.order_manager.orders %}
+                                <tr>
+                                    <td>
+                                        <div class="border-5 ps-3 {{ 'border-start border-success' if order.side == 'buy' else 'border-start border-danger' }}">
+                                            {{ order.id }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="{{ 'text-success' if order.side == 'buy' else 'text-danger' }}">{{ order.side | upper }}</div>
+                                    </td>
+                                    <td>{{ order.price }}</td>
+                                    <td>{{ order.quantity }}</td>
+                                    <td>{{ order.timestamp }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </details>
+                <h1>Positions</h1>
+                <details>
+                    <summary><span class="font-bold">Total ({{ strategy.position_manager.positions | length }})</span>
+                    </summary>
+                    {% if strategy.position_manager.positions %}
+                        <div class="row">
+                            <div class="col-lg-1">Trade #</div>
+                            <div class="col-lg-1">Side</div>
+                            <div class="col-lg-1">Prices</div>
+                        </div>
+                        {% for position in strategy.position_manager.positions %}
+                            <div class="row">
+                                <div class="col-lg-1">{{ loop.index }}</div>
+                                <div class="col-lg-1">{{ position.side }}</div>
+                                <div class="col-lg-2">
+                                    <div>{{ position.take_profit }} (take profit)</div>
+                                    <div>{{ position.price }} (entry)</div>
+                                    <div>{{ position.take_loss }} (take loss)</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </details>
             </div>
         </div>
     </div>
