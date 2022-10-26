@@ -6,13 +6,26 @@
                 <h1>{{ strategy.name }}</h1>
                 <div class="btn btn-success w-100">Run</div>
                 <div class="mt-3">
-                    <label>Dataset</label>
+                    <h3>Dataset</h3>
                     <select class="form-control">
                         {% for dataset in datasets %}
                             <option value="{{ dataset.id }}">{{ dataset.name }}</option>
                         {% endfor %}
                     </select>
                 </div>
+                {% if strategy.parameters %}
+                    <div class="mt-3">
+                    <h3>Parameters</h3>
+                    {% for p in strategy.parameters %}
+                        <div class="d-flex w-100 justify-content-between mt-1">
+                            <div class="w-50">{{ p.alias }}</div>
+                            <div class="w-50">
+                                <input type="text" class="form-control" value="{{ p.default }}">
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
             <div class="col-lg-9">
                 <h1>Chart</h1>

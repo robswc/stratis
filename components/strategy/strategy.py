@@ -19,13 +19,33 @@ def get_decorators(method):
     return decorators
 
 
+def get_parameters_from_strategy(cls):
+    """Gets parameters from a strategy."""
+    logger.debug(f'Getting parameters from {cls.name}')
+    parameters = [attr for attr in dir(cls) if type(getattr(cls, attr)) == Parameter]
+    return {str(p): getattr(cls, p) for p in parameters}
+
+
+def add_parameters_to_strategy(cls, parameters):
+    """Adds parameters to a strategy."""
+    logger.debug(f'Adding parameters to {cls.name}')
+    cls.parameters = list(parameters.values())
+
+
 def runner(func):
     """Decorator to run a strategy, iterating over the data and calling the strategy's run method."""
     logger.debug(f'Running {func.__name__}')
 
     def wrapper(cls, parameters=None):
-        if parameters is None:
-            parameters = {}
+
+        # ensure strategy has data to run on
+        if not cls.data:
+            raise Exception('No data found for strategy.')
+
+        # get strategy parameters
+        parameter_set = get_parameters_from_strategy(cls)
+        add_parameters_to_strategy(cls, parameter_set)
+
         if parameters is None:
             parameters = {}
         logger.debug(f'Running {cls.name}.{func.__name__} with parameters {parameters}')
@@ -96,6 +116,9 @@ class Parameter:
         self.step = step
         self.alias = alias
 
+    def __repr__(self):
+        return f'Parameter(default={self.default}, min_value={self.min_value}, max_value={self.max_value}, step={self.step}, alias={self.alias})'
+
 
 class Plot(list):
     """Plot class for strategies."""
@@ -150,6 +173,7 @@ class Strategy:
     artifacts = []
     plots = []
     strategy_manager = StrategyManager
+    parameters = []
 
     def __repr__(self):
         return f'{self.name}'
