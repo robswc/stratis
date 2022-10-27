@@ -4,6 +4,7 @@ from typing import List
 from loguru import logger
 
 from components.strategy.strategy import Plot
+import pandas as pd
 
 
 def nz(x, y):
@@ -55,3 +56,90 @@ class TechnicalAnalysis:
         kf.pop()
 
         return Plot().from_list(kf)
+
+    @staticmethod
+    def correlation(x, y, length: int) -> Plot:
+        """ Correlation Coefficient """
+        logger.debug(f'Calculating Correlation for {length} period')
+        length = int(length)
+        data = {
+            'x': x,
+            'y': y}
+        df = pd.DataFrame(data=data, columns=['x', 'y'])
+        cc = df['x'].rolling(length).corr(df['y'])
+        new = [None if math.isnan(x) else x for x in cc.tolist()]
+        new.extend([None])
+        return Plot().from_list(new)
+
+    @staticmethod
+    def linreg(source, period):
+        def create_linear_regression(src, source_idx, length):
+            ex, ey, ex2, ey2, exy = 0, 0, 0, 0, 0
+            close_i = 0
+            for i in range(length):
+                close_i = nz(src[source_idx + (i * -1)], 0)
+                ex = ex + i
+                ey = ey + close_i
+                ex2 = ex2 + (i * i)
+                ey2 = ey2 + (close_i * close_i)
+                exy = exy + (close_i * i)
+
+            ext2 = ex ** 2
+            eyt2 = ey ** 2
+            # PearsonsR = (Exy - ((Ex*Ey)/period))/(sqrt(Ex2-(ExT2/period))*sqrt(Ey2-(EyT2/period)))
+            a1 = (exy - ((ex * ey) / length))
+            a2 = math.sqrt(ex2 - (ext2 / length))
+            r = a1 / (a2 * math.sqrt(ey2 - (eyt2 / length)))
+            # ExEx = Ex * Ex, slope = Ex2==ExEx ? 0.0 : (period * Exy - Ex * Ey) / (period * Ex2 - ExEx)
+            exex = ex * ex
+            slope = 0 if ex2 == exex else (length * exy - ex * ey) / (length * ex2 - exex)
+            # linearRegression = (Ey - slope * Ex) / period
+            regression = (ey - slope * ex) / length
+            return regression, r
+
+        regression_list = []
+        r_list = []
+        for idx in range(len(source)):
+            try:
+                reg, pr = create_linear_regression(source, idx, period)
+            except:
+                print('----->', 'ERROR AT', idx, '/', len(source))
+            regression_list.append(reg)
+            r_list.append(pr)
+
+        return regression_list, r_list
+
+    @staticmethod
+    def rma(source, length):
+        rma_list = [source[length]]
+        for idx, i in enumerate(source):
+            value = ((rma_list[idx] * (length - 1)) + source[idx]) / length
+            rma_list.append(round(value, 3))
+        return rma_list
+
+    @staticmethod
+    def atr(high, low, close, length):
+        data_dict = {
+            'high': high,
+            'low': low,
+            'close': close}
+        data = pd.DataFrame(data_dict, columns=['high', 'low', 'close'])
+        high = data['high']
+        low = data['low']
+        close = data['close']
+
+        # true range
+        tr = []
+        for idx, i in enumerate(close):
+            try:
+                prev_close = close[idx - 1]
+            except:
+                prev_close = close[idx]
+            v1 = high[idx] - low[idx]
+            v2 = abs(high[idx] - prev_close)
+            v3 = abs(low[idx] - prev_close)
+            value = round(max(v1, v2, v3), 3)
+            tr.append(value)
+        rma_values = TechnicalAnalysis.rma(tr, length)
+        rma_values.pop(0)
+        return rma_values

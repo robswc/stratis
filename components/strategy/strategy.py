@@ -5,7 +5,9 @@ from loguru import logger
 
 import inspect
 
+from components.strategy.parameters import Parameter
 from components.strategy.position import Order, BasicPosition
+from components.strategy.signal import SignalManager
 
 
 def get_decorators(method):
@@ -83,6 +85,9 @@ def runner(func):
         # reset the index of the data
         cls.data.reset()
 
+        # set plots
+        cls.set_plots()
+
     return wrapper
 
 
@@ -106,30 +111,43 @@ def before(func):
     return wrapper
 
 
-class Parameter:
-    """Parameter class for strategies."""
-
-    def __init__(self, default, min_value=0, max_value=9999, step=1, alias=None):
-        self.default = default
-        self.min_value = min_value
-        self.max_value = max_value
-        self.step = step
-        self.alias = alias
-
-    def __repr__(self):
-        return f'Parameter(default={self.default}, min_value={self.min_value}, max_value={self.max_value}, step={self.step}, alias={self.alias})'
-
-
 class Plot(list):
     """Plot class for strategies."""
 
-    def __init__(self):
+    def __init__(self, name=None, color=None, style=None, width=None, dash=None, opacity=None, overlay=True):
+        if name is not None:
+            self.name = name
+        self.overlay = overlay
+        self.color = color
+        self.style = style
+        self.width = width
+        self.dash = dash
+        self.opacity = opacity
         super().__init__()
 
     def from_list(self, data):
         """Creates a plot from a list."""
         self.extend(data)
         return self
+
+    def fill_none(self, value):
+        """Fills None values in the plot with a value."""
+        for idx, val in enumerate(self):
+            if val is None:
+                self[idx] = value
+        return self
+
+    def config(self):
+        """Returns the config for the plot."""
+        return {
+            'name': self.name,
+            'overlay': self.overlay,
+            'color': self.color,
+            'style': self.style,
+            'width': self.width,
+            'dash': self.dash,
+            'opacity': self.opacity,
+        }
 
     @staticmethod
     def _try_round(value, precision=2):
@@ -175,6 +193,15 @@ class Strategy:
     strategy_manager = StrategyManager
     parameters = []
 
+    def __init__(self):
+        self.order_manager = OrderManager()
+        self.position_manager = PositionManager()
+        self.signal_manager = SignalManager()
+        self.backtest = Backtest()
+        self.strategy_manager.strategies.append(self.__class__)
+        self.name = self.__class__.__name__
+        logger.debug(f'Initialized {self.name}')
+
     def __repr__(self):
         return f'{self.name}'
 
@@ -186,14 +213,6 @@ class Strategy:
             'name': self.name,
             'parameters': {},
         }
-
-    def __init__(self):
-        self.order_manager = OrderManager()
-        self.position_manager = PositionManager()
-        self.backtest = Backtest()
-        self.strategy_manager.strategies.append(self.__class__)
-        self.name = self.__class__.__name__
-        logger.debug(f'Initialized {self.name}')
 
     def create_order(self, order_type, side, quantity, price=None):
         if price is None:
@@ -230,6 +249,19 @@ class Strategy:
 
     def get_idx(self):
         return self.data._idx
+
+    def set_plots(self):
+        plots = []
+        for attr in dir(self):
+            if isinstance(getattr(self, attr), Plot):
+                plot = getattr(self, attr)
+                plot.name = attr
+                plots.append(plot)
+        logger.debug(f'Found ({len(plots)}) plots')
+        self.plots = plots
+
+    def plot_config(self):
+        return [p.config() for p in self.plots]
 
     def run(self, parameters):
         raise NotImplementedError

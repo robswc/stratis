@@ -11,7 +11,7 @@ templates = Jinja2Templates(directory="templates")
 sm = StrategyManager()
 
 
-@router.get("/")
+@router.get("/", include_in_schema=False)
 async def view_all_strategies(request: Request):
     strategies = []
     # request all strategies from strategy manager
@@ -27,12 +27,12 @@ async def view_all_strategies(request: Request):
     )
 
 
-@router.get("/{strategy_name}")
-async def view_strategy(request: Request, strategy_name: str, ohlcv_name: str = None):
+@router.get("/{strategy_name}", include_in_schema=False)
+async def view_strategy(request: Request, strategy_name: str, dataset: str = None):
     strategy = sm.get_new_strategy(strategy_name)
     print('STRATEGY ->', id(strategy))
-    if ohlcv_name:
-        ohlcv = OHLCVManager().get_dataset(ohlcv_name)
+    if dataset:
+        ohlcv = OHLCVManager().get_dataset(dataset)
         strategy.data = ohlcv
         strategy.run({})
 

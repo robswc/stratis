@@ -15,20 +15,30 @@
                 </div>
                 {% if strategy.parameters %}
                     <div class="mt-3">
-                    <h3>Parameters</h3>
-                    {% for p in strategy.parameters %}
-                        <div class="d-flex w-100 justify-content-between mt-1">
-                            <div class="w-50">{{ p.alias }}</div>
-                            <div class="w-50">
-                                <input type="text" class="form-control" value="{{ p.default }}">
+                        <h3>Parameters</h3>
+                        {% for p in strategy.parameters %}
+                            <div class="d-flex w-100 justify-content-between mt-1">
+                                <div class="w-50">{{ p.alias }}</div>
+                                <div class="w-50">
+                                    <input type="text" class="form-control" value="{{ p.value }}">
+                                </div>
                             </div>
-                        </div>
-                    {% endfor %}
-                </div>
+                        {% endfor %}
+                    </div>
                 {% endif %}
             </div>
             <div class="col-lg-9">
-                <h1>Chart</h1>
+                <div class="d-flex align-items-center gap-3">
+                    <h1>Chart</h1>
+                    <div>
+                        <details>
+                            <summary>settings</summary>
+                            {% for plot in strategy.plots %}
+                                <div class="form-check">{{ plot.name }}</div>
+                            {% endfor %}
+                        </details>
+                    </div>
+                </div>
                 <div id="chart"></div>
                 <h1>Orders</h1>
                 <details>
@@ -91,83 +101,12 @@
             </div>
         </div>
     </div>
+    <script src="/static/js/viewStrategy.js"></script>
+    <script src="/static/js/createChart.js"></script>
+    <script src="/static/js/createTraces.js"></script>
     <script>
-
-        // fetch data
-        async function getOhlcv() {
-            // make ajax request
-            const response = await fetch('/api/v1/data?name=AAPL');
-            // parse json
-            const data = await response.json();
-            // return data
-            return data.map(d => {
-                return {
-                    datetime: new Date(d.datetime),
-                    open: d.open,
-                    high: d.high,
-                    low: d.low,
-                    close: d.close,
-                    volume: d.volume
-                }
-            });
-
-        }
-
-        function unpack(rows, key) {
-            return rows.map(function (row) {
-                return row[key];
-            });
-        }
-
-        // create chart
-        async function createChart() {
-            const ohlc = await getOhlcv()
-
-            var trace = {
-                x: unpack(ohlc, 'datetime'),
-                close: unpack(ohlc, 'close'),
-                high: unpack(ohlc, 'high'),
-                low: unpack(ohlc, 'low'),
-                open: unpack(ohlc, 'open'),
-
-                // cutomise colors
-                increasing: {line: {color: 'green'}},
-                decreasing: {line: {color: 'red'}},
-
-                type: 'ohlc',
-                xaxis: 'x',
-                yaxis: 'y'
-            };
-
-
-            var data = [trace];
-
-            console.log(trace)
-
-
-            var layout = {
-                dragmode: 'zoom',
-                margin: {
-                    r: 10,
-                    t: 25,
-                    b: 40,
-                    l: 60
-                },
-                showlegend: false,
-                xaxis: {
-                    autorange: true,
-                    title: 'Date',
-                    type: 'date'
-                },
-                yaxis: {
-                    autorange: true,
-                    type: 'linear'
-                }
-            };
-
-            Plotly.newPlot('chart', data, layout);
-        }
-
-        createChart()
+    // create chart
+    createChart('chart', "{{ strategy.data.name | string }}", {{ strategy.plots | tojson }}, {{ strategy.plot_config() | tojson }});
+    // create plots section
     </script>
 {% endblock %}
