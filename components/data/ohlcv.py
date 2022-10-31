@@ -76,7 +76,8 @@ class OHLCV(list):
         return self._load(data, False)
 
     def validate(self):
-        pass
+        if len(self.raw_data) == 0:
+            raise ValueError('No data to validate')
 
     def open(self, offset=0, as_list=False):
         return self._get_ohlc('close', offset, as_list)

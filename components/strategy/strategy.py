@@ -123,6 +123,7 @@ class Plot(list):
         self.width = width
         self.dash = dash
         self.opacity = opacity
+        self.visible = True
         super().__init__()
 
     def from_list(self, data):
@@ -147,6 +148,7 @@ class Plot(list):
             'width': self.width,
             'dash': self.dash,
             'opacity': self.opacity,
+            'visible': self.visible
         }
 
     @staticmethod

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
 
-from components.data.ohlcv import OHLCVManager
+from components.data.ohlcv import OHLCVManager, OHLCV
 from components.strategy.strategy import StrategyManager
 
 router = APIRouter()
@@ -32,7 +32,7 @@ async def view_strategy(request: Request, strategy_name: str, dataset: str = Non
     strategy = sm.get_new_strategy(strategy_name)
     print('STRATEGY ->', id(strategy))
     if dataset:
-        ohlcv = OHLCVManager().get_dataset(dataset)
+        ohlcv = OHLCV().from_api(dataset)
         strategy.data = ohlcv
         strategy.run({})
 

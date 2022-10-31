@@ -4,7 +4,9 @@ function createTraces(plotData, plotConfig, ohlc) {
     // create plot traces
     for (let i = 0; i < plotData.length; i++) {
         const plot = plotData[i];
-        plotTraces.push({
+        console.log('VISIBLE', plotConfig[i]['visible'])
+        if (plotConfig[i]['visible']) {
+            plotTraces.push({
             x: unpack(ohlc, 'datetime'),
             y: plot,
             xaxis: 'x',
@@ -16,6 +18,7 @@ function createTraces(plotData, plotConfig, ohlc) {
                 width: 1
             }
         })
+        }
     }
     return plotTraces
 }
