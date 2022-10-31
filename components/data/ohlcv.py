@@ -1,5 +1,6 @@
 import csv
 
+import requests
 from loguru import logger
 
 
@@ -62,6 +63,17 @@ class OHLCV(list):
         f.close()
         self.name = path.split('/')[-1].split('.')[0]
         return self._load(csv_data, True)
+
+    def from_api(self, dataset=None):
+        url = 'http://192.168.0.216:5510/dataset/ohlc'
+        r = requests.get(
+            url=url,
+            params={'dataset': dataset}
+        )
+        r.raise_for_status()
+        data = r.json().get('data')
+        self.name = dataset
+        return self._load(data, False)
 
     def validate(self):
         pass

@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from components.data.ohlcv import OHLCVManager
+from components.data.ohlcv import OHLCVManager, OHLCV
 from components.strategy.strategy import StrategyManager
 
 router = APIRouter()
@@ -29,7 +29,7 @@ async def get_orders(name: str, parameters: Parameters):
 async def get_signals(strategy: str, dataset: str, parameters: Parameters):
     """Gets the signals for a strategy."""
     strategy = sm.get_new_strategy(strategy)
-    data = OHLCVManager().get_dataset(dataset)
+    data = OHLCV().from_api(dataset)
     strategy.data = data
     if strategy:
         strategy.run({})
