@@ -30,10 +30,10 @@ async def get_signals(strategy: str, dataset: str, parameters: Parameters):
     """Gets the signals for a strategy."""
     strategy = sm.get_new_strategy(strategy)
     data = OHLCVManager().get_dataset(dataset)
+    strategy.data = data
     if strategy:
         strategy.run({})
-        strategy.backtest.run()
-        return strategy.signal_manager.signals
+        return [s.dict() for s in strategy.signal_manager.signals]
     return []
 
 

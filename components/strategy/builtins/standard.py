@@ -142,4 +142,4 @@ class TechnicalAnalysis:
             tr.append(value)
         rma_values = TechnicalAnalysis.rma(tr, length)
         rma_values.pop(0)
-        return rma_values
+        return Plot().from_list(rma_values)
