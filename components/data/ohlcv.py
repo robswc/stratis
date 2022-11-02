@@ -13,6 +13,26 @@ class OHLCVManager:
                 return dataset
         return None
 
+    def delete(self, name):
+        """Deletes a dataset by name."""
+        for idx, dataset in enumerate(self.datasets):
+            if dataset.name == name:
+                del self.datasets[idx]
+                return True
+        return False
+
+    def add_dataset(self, dataset):
+        """Adds a dataset to the manager."""
+        existing = self.get_dataset(dataset.name)
+        if existing is None:
+            self.datasets.append(dataset)
+        else:
+            logger.warning(f'Dataset {dataset.name} already exists, updating dataset.')
+            self.datasets.remove(existing)
+            del existing
+            self.datasets.append(dataset)
+            return True
+
     def get_new_dataset(self, name):
         """Gets a dataset by name."""
         for d in self.datasets:
@@ -30,7 +50,6 @@ class OHLCV(list):
         self.validated_data = None
         self._idx = 0
         self.name = None
-        self.manager.datasets.append(self)
 
     def reset(self):
         self._idx = 0
@@ -53,6 +72,7 @@ class OHLCV(list):
             for key in row.keys():
                 row[key] = float(row[key])
         self.extend(self.validated_data)
+        self.manager().add_dataset(self)
         return self
 
     def from_csv(self, path):
@@ -68,7 +88,8 @@ class OHLCV(list):
         url = 'http://192.168.0.216:5510/dataset/ohlc'
         r = requests.get(
             url=url,
-            params={'dataset': dataset}
+            params={
+                'dataset': dataset}
         )
         r.raise_for_status()
         data = r.json().get('data')

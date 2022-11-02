@@ -82,7 +82,7 @@ def runner(func):
                 logger.debug(f'Running {cls.name}.{m}')
                 getattr(cls, m)()
 
-        # reset the index of the data
+        # reset the dataset
         cls.data.reset()
 
         # set plots

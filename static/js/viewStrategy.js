@@ -5,6 +5,8 @@ async function getOhlcv(dataset) {
     const response = await fetch('/api/v1/data?name=' + dataset);
     // parse json
     const data = await response.json();
+    console.log('found data for ', dataset)
+    console.log('OHLCV length: ', data.length)
     // return data
     return data.map(d => {
         return {
