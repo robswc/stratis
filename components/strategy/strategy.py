@@ -178,7 +178,7 @@ class PositionManager:
 
 
 class StrategyManager:
-    strategies = []
+    strategies = set()
 
     def get_new_strategy(self, name: str):
         """Gets a strategy by name."""
@@ -200,7 +200,7 @@ class Strategy:
         self.position_manager = PositionManager()
         self.signal_manager = SignalManager()
         self.backtest = Backtest()
-        self.strategy_manager.strategies.append(self.__class__)
+        self.strategy_manager.strategies.add(self.__class__)
         self.name = self.__class__.__name__
         logger.debug(f'Initialized {self.name}')
 
