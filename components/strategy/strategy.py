@@ -51,6 +51,7 @@ def runner(func):
         if parameters is None:
             parameters = {}
         logger.debug(f'Running {cls.name}.{func.__name__} with parameters {parameters}')
+        logger.debug(f'Dataset found: {cls.data.name}')
         logger.debug(
             f'Running {cls.name}.{func.__name__} with data [sample : {cls.data.validated_data[0]}] (length : {len(cls.data.validated_data)})')
 
