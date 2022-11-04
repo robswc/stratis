@@ -186,7 +186,7 @@ class StrategyManager:
         for s in self.strategies:
             if s.__name__ == name:
                 return s()
-        return None
+        raise Exception(f'No strategy found with name {name}.')
 
 
 class Strategy:

@@ -1,6 +1,5 @@
 import csv
 
-import requests
 from loguru import logger
 
 
@@ -50,6 +49,7 @@ class OHLCV(list):
         self.validated_data = None
         self._idx = 0
         self.name = None
+        self.manager.datasets.append(self)
 
     def reset(self):
         self._idx = 0
@@ -72,7 +72,6 @@ class OHLCV(list):
             for key in row.keys():
                 row[key] = float(row[key])
         self.extend(self.validated_data)
-        self.manager().add_dataset(self)
         return self
 
     def from_csv(self, path):
