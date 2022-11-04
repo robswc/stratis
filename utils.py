@@ -28,3 +28,7 @@ def import_datasets(dataset_path: str):
             logger.debug(f'Importing Dataset from: {file}')
             logger.debug(f'Creating OHLCV from: {file}')
             OHLCV().from_csv(f'{dataset_path}/{file}')
+
+
+def import_datasets_from_external_source(url: str):
+    pass

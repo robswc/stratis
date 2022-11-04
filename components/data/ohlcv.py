@@ -63,6 +63,9 @@ class OHLCV(list):
         self.name = path.split('/')[-1].split('.')[0]
         return self._load(csv_data, True)
 
+    def from_api(self, *args, **kwargs):
+        raise NotImplementedError
+
     def validate(self):
         pass
 
