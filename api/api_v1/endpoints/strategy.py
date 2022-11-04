@@ -14,6 +14,12 @@ class Parameters(BaseModel):
     parameters: dict
 
 
+@router.get("")
+async def get_all_strategies():
+    """Gets all available strategies."""
+    return [s.__name__ for s in sm.strategies]
+
+
 @router.post("/orders")
 async def get_orders(name: str, parameters: Parameters):
     """Gets the orders for a strategy."""
