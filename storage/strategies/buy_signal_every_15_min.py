@@ -1,9 +1,7 @@
 import datetime
 
-from components.data.ohlcv import OHLCV
 from components.strategy.signal import Signal
-from components.strategy.strategy import Strategy, before, runner, after, Parameter
-from components.strategy import ta
+from components.strategy.strategy import Strategy, runner, after
 
 
 class BuySignalEvery15Min(Strategy):

@@ -1,5 +1,6 @@
 import csv
 
+import requests
 from loguru import logger
 
 
