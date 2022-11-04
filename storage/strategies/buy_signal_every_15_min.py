@@ -15,6 +15,8 @@ class BuySignalEvery15Min(Strategy):
                 timestamp=int(ts.timestamp()),
                 side='buy',
                 price=self.data.close(),
+                take_profit=self.data.close() + 10,
+                take_loss=self.data.close() - 10,
             )
             self.signal_manager.signals.append(s)
 
