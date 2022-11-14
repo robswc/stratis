@@ -8,6 +8,12 @@ import pandas as pd
 
 
 def nz(x, y):
+    try:
+        if math.isnan(x):
+            return y
+    except:
+        return y
+
     if x == 0:
         return y
     try:
@@ -15,6 +21,14 @@ def nz(x, y):
             return x
     except:
         return y
+
+
+def na(source, idx):
+    try:
+        if source[idx]:
+            return False
+    except:
+        return True
 
 
 class TechnicalAnalysis:
@@ -111,35 +125,61 @@ class TechnicalAnalysis:
 
     @staticmethod
     def rma(source, length):
-        rma_list = [source[length]]
+        """ Calculate Pinescript-esque RMA """
+        rma = []
+        alpha = 1 / length
         for idx, i in enumerate(source):
-            value = ((rma_list[idx] * (length - 1)) + source[idx]) / length
-            rma_list.append(round(value, 3))
-        return rma_list
+            if idx == 0:
+                rma.append(source[idx])
+            else:
+                rma.append((alpha * source[idx]) + (1 - alpha) * rma[idx - 1])
+        return Plot().from_list(rma)
+
+    # alpha = 1 / length
+    # sum = 0.0
+    # sum := na(sum[1]) ? ta.sma(src, length): alpha * src + (1 - alpha) * nz(sum[1])
 
     @staticmethod
     def atr(high, low, close, length):
-        data_dict = {
-            'high': high,
-            'low': low,
-            'close': close}
-        data = pd.DataFrame(data_dict, columns=['high', 'low', 'close'])
-        high = data['high']
-        low = data['low']
-        close = data['close']
+        atr = Plot()
 
-        # true range
-        tr = []
-        for idx, i in enumerate(close):
-            try:
-                prev_close = close[idx - 1]
-            except:
-                prev_close = close[idx]
-            v1 = high[idx] - low[idx]
-            v2 = abs(high[idx] - prev_close)
-            v3 = abs(low[idx] - prev_close)
-            value = round(max(v1, v2, v3), 3)
-            tr.append(value)
-        rma_values = TechnicalAnalysis.rma(tr, length)
-        rma_values.pop(0)
-        return Plot().from_list(rma_values)
+        # math.
+        for idx in range(len(high)):
+            if idx != 0:
+                t1 = high[idx] - low[idx]
+                t2 = abs(high[idx] - close[idx - 1])
+                t3 = abs(low[idx] - close[idx - 1])
+                v = max(t1, t2, t3)
+            else:
+                v = high[idx] - low[idx]
+            atr.append(v)
+
+        print(atr)
+        smoothed_atr = TechnicalAnalysis.rma(atr, length)
+        return Plot().from_list(smoothed_atr)
+
+
+        # data_dict = {
+        #     'high': high,
+        #     'low': low,
+        #     'close': close}
+        # data = pd.DataFrame(data_dict, columns=['high', 'low', 'close'])
+        # high = data['high']
+        # low = data['low']
+        # close = data['close']
+        #
+        # # true range
+        # tr = []
+        # for idx, i in enumerate(close):
+        #     try:
+        #         prev_close = close[idx - 1]
+        #     except:
+        #         prev_close = close[idx]
+        #     v1 = high[idx] - low[idx]
+        #     v2 = abs(high[idx] - prev_close)
+        #     v3 = abs(low[idx] - prev_close)
+        #     value = round(max(v1, v2, v3), 3)
+        #     tr.append(value)
+        # rma_values = TechnicalAnalysis.rma(tr, length)
+        # rma_values.pop(0)
+        # return Plot().from_list(rma_values)

@@ -132,6 +132,10 @@ class Plot(list):
         self.extend(data)
         return self
 
+    def as_list(self):
+        """Returns the plot as a list."""
+        return list(self)
+
     def fill_none(self, value):
         """Fills None values in the plot with a value."""
         for idx, val in enumerate(self):
