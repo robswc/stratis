@@ -135,10 +135,6 @@ class TechnicalAnalysis:
                 rma.append((alpha * source[idx]) + (1 - alpha) * rma[idx - 1])
         return Plot().from_list(rma)
 
-    # alpha = 1 / length
-    # sum = 0.0
-    # sum := na(sum[1]) ? ta.sma(src, length): alpha * src + (1 - alpha) * nz(sum[1])
-
     @staticmethod
     def atr(high, low, close, length):
         atr = Plot()
@@ -157,29 +153,3 @@ class TechnicalAnalysis:
         print(atr)
         smoothed_atr = TechnicalAnalysis.rma(atr, length)
         return Plot().from_list(smoothed_atr)
-
-
-        # data_dict = {
-        #     'high': high,
-        #     'low': low,
-        #     'close': close}
-        # data = pd.DataFrame(data_dict, columns=['high', 'low', 'close'])
-        # high = data['high']
-        # low = data['low']
-        # close = data['close']
-        #
-        # # true range
-        # tr = []
-        # for idx, i in enumerate(close):
-        #     try:
-        #         prev_close = close[idx - 1]
-        #     except:
-        #         prev_close = close[idx]
-        #     v1 = high[idx] - low[idx]
-        #     v2 = abs(high[idx] - prev_close)
-        #     v3 = abs(low[idx] - prev_close)
-        #     value = round(max(v1, v2, v3), 3)
-        #     tr.append(value)
-        # rma_values = TechnicalAnalysis.rma(tr, length)
-        # rma_values.pop(0)
-        # return Plot().from_list(rma_values)
