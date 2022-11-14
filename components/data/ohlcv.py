@@ -70,13 +70,13 @@ class OHLCV(list):
         pass
 
     def open(self, offset=0, as_list=False):
-        return self._get_ohlc('close', offset, as_list)
+        return self._get_ohlc('open', offset, as_list)
 
     def high(self, offset=0, as_list=False):
-        return self._get_ohlc('close', offset, as_list)
+        return self._get_ohlc('high', offset, as_list)
 
     def low(self, offset=0, as_list=False):
-        return self._get_ohlc('close', offset, as_list)
+        return self._get_ohlc('low', offset, as_list)
 
     def close(self, offset=0, as_list=False):
         return self._get_ohlc('close', offset, as_list)
