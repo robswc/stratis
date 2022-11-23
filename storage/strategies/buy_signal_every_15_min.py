@@ -20,7 +20,6 @@ class BuySignalEvery15Min(Strategy):
             )
             self.signal_manager.signals.append(s)
 
-
     @after
     def run_backtest(self):
         self.backtest.run()

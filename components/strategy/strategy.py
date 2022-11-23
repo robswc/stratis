@@ -1,6 +1,5 @@
-import datetime
 
-from components.strategy.backtest import Backtest
+from components.strategy.backtest.backtest import Backtest
 from loguru import logger
 
 import inspect
@@ -197,7 +196,7 @@ class Strategy:
         self.order_manager = OrderManager()
         self.position_manager = PositionManager()
         self.signal_manager = SignalManager()
-        self.backtest = Backtest()
+        self.backtest = Backtest(self)
         self.strategy_manager.strategies.append(self.__class__)
         self.name = self.__class__.__name__
         logger.debug(f'Initialized {self.name}')
