@@ -1,5 +1,8 @@
+import json
+
 from fastapi import APIRouter
 from pydantic import BaseModel
+from starlette.responses import Response
 
 from components.data.ohlcv import OHLCVManager, OHLCV
 from components.strategy.strategy import StrategyManager
@@ -43,13 +46,23 @@ async def get_signals(strategy: str, dataset: str, parameters: Parameters):
     return []
 
 
-@router.post("/backtest", response_model=list)
+class BacktestResponse(BaseModel):
+    """Response for the backtest."""
+    overview: dict
+    properties: dict
+    positions: list
+
+
+@router.post("/backtest", response_model=BacktestResponse)
 async def get_signals(strategy: str, dataset: str, parameters: Parameters):
     """Gets the signals for a strategy."""
     strategy = sm.get_new_strategy(strategy)
     data = OHLCVManager().get_dataset(dataset)
     if strategy:
         strategy.run({})
-        strategy.backtest.run()
-        return strategy.signal_manager.signals
-    return []
+    results = strategy.backtest.results()
+    return BacktestResponse(
+        overview=results["overview"],
+        properties=results["properties"],
+        positions=results["positions"],
+    )

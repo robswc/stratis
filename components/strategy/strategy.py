@@ -1,6 +1,5 @@
-import datetime
 
-from components.strategy.backtest import Backtest
+from components.strategy.backtest.backtest import Backtest
 from loguru import logger
 
 import inspect
@@ -51,7 +50,6 @@ def runner(func):
         if parameters is None:
             parameters = {}
         logger.debug(f'Running {cls.name}.{func.__name__} with parameters {parameters}')
-        logger.debug(f'Dataset found: {cls.data.name}')
         logger.debug(
             f'Running {cls.name}.{func.__name__} with data [sample : {cls.data.validated_data[0]}] (length : {len(cls.data.validated_data)})')
 
@@ -83,7 +81,7 @@ def runner(func):
                 logger.debug(f'Running {cls.name}.{m}')
                 getattr(cls, m)()
 
-        # reset the dataset
+        # reset the index of the data
         cls.data.reset()
 
         # set plots
@@ -124,17 +122,12 @@ class Plot(list):
         self.width = width
         self.dash = dash
         self.opacity = opacity
-        self.visible = True
         super().__init__()
 
     def from_list(self, data):
         """Creates a plot from a list."""
         self.extend(data)
         return self
-
-    def as_list(self):
-        """Returns the plot as a list."""
-        return list(self)
 
     def fill_none(self, value):
         """Fills None values in the plot with a value."""
@@ -153,7 +146,6 @@ class Plot(list):
             'width': self.width,
             'dash': self.dash,
             'opacity': self.opacity,
-            'visible': self.visible
         }
 
     @staticmethod
@@ -183,7 +175,7 @@ class PositionManager:
 
 
 class StrategyManager:
-    strategies = set()
+    strategies = []
 
     def get_new_strategy(self, name: str):
         """Gets a strategy by name."""
@@ -204,8 +196,8 @@ class Strategy:
         self.order_manager = OrderManager()
         self.position_manager = PositionManager()
         self.signal_manager = SignalManager()
-        self.backtest = Backtest()
-        self.strategy_manager.strategies.add(self.__class__)
+        self.backtest = Backtest(self)
+        self.strategy_manager.strategies.append(self.__class__)
         self.name = self.__class__.__name__
         logger.debug(f'Initialized {self.name}')
 

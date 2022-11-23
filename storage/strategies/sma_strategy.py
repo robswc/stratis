@@ -23,10 +23,12 @@ class SMAStrategy(Strategy):
     def run(self, parameters):
         idx = self.get_idx()
         if self.sma_fast[idx] > self.sma_slow[idx] and self.sma_fast[idx - 1] < self.sma_slow[idx - 1]:
-            self.create_order(
-                order_type='market',
+            self.create_basic_position(
                 side='buy',
                 quantity=1,
+                order_type='MARKET',
+                take_profit=self.data.close() + 5,
+                take_loss=self.data.close() - 5
             )
 
     @after
