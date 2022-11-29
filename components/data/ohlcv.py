@@ -7,11 +7,11 @@ from loguru import logger
 class OHLCVManager:
     datasets = []
 
-    def get_dataset(self, name):
+    def get_dataset(self, name) -> 'OHLCV':
         for dataset in self.datasets:
             if dataset.name == name:
                 return dataset
-        return None
+        raise ValueError(f'Dataset {name} not found.')
 
     def delete(self, name):
         """Deletes a dataset by name."""
@@ -85,7 +85,8 @@ class OHLCV(list):
         return self._load(csv_data, True)
 
     def from_api(self, dataset=None):
-        url = 'http://192.168.0.216:5510/dataset/ohlc'
+        # url = 'http://192.168.0.216:5510/dataset/ohlc'
+        url = 'http://127.0.0.1:8010/dataset/ohlc'
         r = requests.get(
             url=url,
             params={

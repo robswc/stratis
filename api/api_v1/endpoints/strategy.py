@@ -57,7 +57,8 @@ class BacktestResponse(BaseModel):
 async def get_signals(strategy: str, dataset: str, parameters: Parameters):
     """Gets the signals for a strategy."""
     strategy = sm.get_new_strategy(strategy)
-    data = OHLCVManager().get_dataset(dataset)
+    data = OHLCV().from_api(dataset)
+    strategy.data = data
     if strategy:
         strategy.run({})
     results = strategy.backtest.results()

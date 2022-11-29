@@ -14,7 +14,8 @@ class BacktestOverview:
         self.max_drawdown = 0
 
     def __str__(self):
-        return f'Net profit: {self.net_profit}\nTotal trades: {self.total_trades}\nPercent profitable: {self.percent_profitable}\nProfit factor: {self.profit_factor}\nMax drawdown: {self.max_drawdown}'
+        return f'\nNet profit: {self.net_profit}\nTotal trades: {self.total_trades}\nPercent profitable:' \
+               f' {self.percent_profitable}\nProfit factor: {self.profit_factor}\nMax drawdown: {self.max_drawdown}\n'
 
     def as_dict(self):
         return {
@@ -24,6 +25,7 @@ class BacktestOverview:
             'profit_factor': self.profit_factor,
             'max_drawdown': self.max_drawdown,
         }
+
 
 class BacktestProperties:
     def __init__(self):
@@ -41,6 +43,7 @@ class BacktestProperties:
             'strategy': self.strategy,
         }
 
+
 class Backtest:
     def __init__(self, strategy):
         self.overview = BacktestOverview()
@@ -53,7 +56,7 @@ class Backtest:
         return {
             'overview': self.overview.as_dict(),
             'properties': self.properties.as_dict(),
-            'positions': [],
+            'positions': self.positions,
         }
 
     def run(self):
@@ -72,6 +75,14 @@ class Backtest:
         # wait for threads to finish
         for thread in self.threads:
             thread.join()
+
+
+        # calculate overview
+        self.overview.net_profit = sum([p.pnl for p in self.positions])
+        self.overview.total_trades = len(self.positions)
+        self.overview.percent_profitable = len([p for p in self.positions if p.pnl > 0]) / len(self.positions)
+        # self.overview.profit_factor = \
+        #     sum([p.pnl for p in self.positions if p.pnl > 0]) / sum([p.pnl for p in self.positions if p.pnl < 0])
 
         logger.info('[ OK ] Backtest complete')
         logger.info(f'\n{self.overview}')

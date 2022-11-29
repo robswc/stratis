@@ -177,7 +177,7 @@ class PositionManager:
 class StrategyManager:
     strategies = []
 
-    def get_new_strategy(self, name: str):
+    def get_new_strategy(self, name: str) -> 'Strategy':
         """Gets a strategy by name."""
         for s in self.strategies:
             if s.__name__ == name:

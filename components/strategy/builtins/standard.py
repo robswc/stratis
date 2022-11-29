@@ -150,6 +150,5 @@ class TechnicalAnalysis:
                 v = high[idx] - low[idx]
             atr.append(v)
 
-        print(atr)
         smoothed_atr = TechnicalAnalysis.rma(atr, length)
         return Plot().from_list(smoothed_atr)

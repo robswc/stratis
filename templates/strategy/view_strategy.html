@@ -84,6 +84,7 @@
                             <div class="col-lg-1">Trade #</div>
                             <div class="col-lg-1">Side</div>
                             <div class="col-lg-1">Prices</div>
+                            <div class="col-lg-1">Timestamp</div>
                         </div>
                         {% for position in strategy.position_manager.positions %}
                             <div class="row">
@@ -94,10 +95,40 @@
                                     <div>{{ position.price }} (entry)</div>
                                     <div>{{ position.take_loss }} (take loss)</div>
                                 </div>
+                                <div class="col-lg-1">{{ position.get_timestamp() }}</div>
                             </div>
                         {% endfor %}
                     {% endif %}
                 </details>
+                {% if strategy.backtest.positions %}
+                    <h1>Backtest Positions</h1>
+                    <details>
+                        <summary><span class="font-bold">Total ({{ strategy.backtest.positions | length }})</span>
+                        </summary>
+                        <div class="row font-bold">
+                            <div class="col-lg-1">Trade #</div>
+                            <div class="col-lg-1">Side</div>
+                            <div class="col-lg-2">Prices</div>
+                            <div class="col-lg-1">Entered (ts)</div>
+                            <div class="col-lg-1">Exit (ts)</div>
+                            <div class="col-lg-1">PNL</div>
+                        </div>
+                        {% for position in strategy.backtest.positions %}
+                            <div class="row mb-2">
+                                <div class="col-lg-1">{{ loop.index }}</div>
+                                <div class="col-lg-1">{{ position.side }}</div>
+                                <div class="col-lg-2">
+                                    <div>{{ position.take_profit }} (take profit)</div>
+                                    <div>{{ position.entry_price }} (entry)</div>
+                                    <div>{{ position.take_loss }} (take loss)</div>
+                                </div>
+                                <div class="col-lg-1">{{ position.get_timestamp() }}</div>
+                                <div class="col-lg-1">{{ position.get_filled_timestamp() }}</div>
+                                <div class="col-lg-1">{{ position.pnl }}</div>
+                            </div>
+                        {% endfor %}
+                    </details>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -105,8 +136,8 @@
     <script src="/static/js/createChart.js"></script>
     <script src="/static/js/createTraces.js"></script>
     <script>
-    // create chart
-    createChart('chart', "{{ strategy.data.name | string }}", {{ strategy.plots | tojson }}, {{ strategy.plot_config() | tojson }});
-    // create plots section
+        // create chart
+        createChart('chart', "{{ strategy.data.name | string }}", {{ strategy.plots | tojson }}, {{ strategy.plot_config() | tojson }});
+        // create plots section
     </script>
 {% endblock %}

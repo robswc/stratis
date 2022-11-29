@@ -57,5 +57,8 @@ class BasicPosition(BasePosition):
         self.data_index = data_index
         self.validate()
 
+    def get_timestamp(self, fmt='%Y-%m-%d %H:%M:%S'):
+        return datetime.datetime.fromtimestamp(self.timestamp / 1000).strftime(fmt)
+
     def validate(self):
         return True
