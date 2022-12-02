@@ -4,7 +4,6 @@ from components.strategy import ta
 
 
 class SMAStrategy(Strategy):
-    data = OHLCV().from_csv('storage/data/ohlcv/AAPL.csv')
 
     sma_slow = []
     sma_fast = []
