@@ -2,15 +2,31 @@
 {% block content %}
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-3">
+            <div class="col-lg-6">
                 <h1>Available datasets</h1>
-                <ul>
+                <table class='w-100'>
+                    <thead>
+                    <tr>
+                        <th>Dataset</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
                     {% for dataset in datasets %}
-                        <li><a href="{{ dataset['link'] }}">{{ dataset['name'] }}</a></li>
+                        <tr>
+                        <td class="d-flex align-items-center gap-2 px-2 me-2">
+                            <i class="fa-solid fa-file text-secondary"></i><a href="{{ dataset['link'] }}">{{ dataset['name'] }}</a>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-trash text-danger"></i>
+                            </div>
+                        </td>
+                        </tr>
                     {% endfor %}
-                </ul>
+                    </tbody>
+                </table>
             </div>
-            <div class="col-lg-8">main</div>
         </div>
     </div>
 {% endblock %}
