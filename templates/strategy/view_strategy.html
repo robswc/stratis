@@ -114,7 +114,7 @@
                             <div class="col-lg-1">PNL</div>
                         </div>
                         {% for position in strategy.backtest.positions %}
-                            <div class="row mb-2">
+                            <div class="row mb-2 border-bottom">
                                 <div class="col-lg-1">{{ loop.index }}</div>
                                 <div class="col-lg-1">{{ position.side }}</div>
                                 <div class="col-lg-2">
@@ -136,8 +136,9 @@
     <script src="/static/js/createChart.js"></script>
     <script src="/static/js/createTraces.js"></script>
     <script>
+        console.log('plots', {{ strategy.plots | tojson }})
         // create chart
-        createChart('chart', "{{ strategy.data.name | string }}", {{ strategy.plots | tojson }}, {{ strategy.plot_config() | tojson }});
+        createChart('chart', "{{ strategy.data.name | string }}", {{ positions | tojson }}, {{ strategy.plots | tojson }}, {{ strategy.plot_config() | tojson }});
         // create plots section
     </script>
 {% endblock %}

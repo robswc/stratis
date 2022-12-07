@@ -8,14 +8,31 @@ from loguru import logger
 class BacktestPosition:
     def __init__(self):
         self.entry_price = None
+        self.exit_price = None
         self.take_profit = None
         self.take_loss = None
         self.side = None
         self.quantity = None
         self.timestamp = None
         self.data_index = None
+        self.filled_data_index = None
         self.filled_timestamp = None
         self.pnl = 0
+
+    def as_json(self):
+        return {
+            'entry_price': self.entry_price,
+            'exit_price': self.exit_price,
+            'take_profit': self.take_profit,
+            'take_loss': self.take_loss,
+            'side': self.side,
+            'quantity': self.quantity,
+            'timestamp': self.timestamp,
+            'data_index': self.data_index,
+            'filled_data_index': self.filled_data_index,
+            'filled_timestamp': self.filled_timestamp,
+            'pnl': self.pnl,
+        }
 
     def from_position(self, position: BasicPosition) -> 'BacktestPosition':
         """Creates a backtest position from a position object"""
@@ -25,14 +42,17 @@ class BacktestPosition:
         self.side = position.side
         self.quantity = position.quantity
         self.timestamp = position.timestamp
-        self.data_index = position.data_index
+        self.data_index = position.data_index + 1
         return self
 
     def get_timestamp(self, fmt='%Y-%m-%d %H:%M:%S'):
         return datetime.datetime.fromtimestamp(self.timestamp / 1000).strftime(fmt)
 
     def get_filled_timestamp(self, fmt='%Y-%m-%d %H:%M:%S'):
-        return datetime.datetime.fromtimestamp(self.filled_timestamp / 1000).strftime(fmt)
+        if self.filled_timestamp:
+            return datetime.datetime.fromtimestamp(self.filled_timestamp / 1000).strftime(fmt)
+        else:
+            return None
 
     def test(self, ohlc):
         in_bounds = True
@@ -52,7 +72,8 @@ class BacktestPosition:
 
             idx += 1
 
-        self.filled_timestamp = ohlc[idx]['datetime']
+        self.filled_timestamp = ohlc[idx - 1]['datetime']
+        self.filled_data_index = idx - 1
 
         if self.side == 'buy':
             exit_price = ohlc[idx]['low'] if self.take_loss < self.take_profit else ohlc[idx]['high']
@@ -60,3 +81,5 @@ class BacktestPosition:
         else:
             exit_price = ohlc[idx]['high'] if self.take_loss < self.take_profit else ohlc[idx]['low']
             self.pnl = (self.entry_price - exit_price) * self.quantity
+
+        self.exit_price = exit_price

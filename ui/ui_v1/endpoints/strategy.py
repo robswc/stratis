@@ -46,6 +46,7 @@ async def view_strategy(request: Request, strategy_name: str, dataset: str = Non
         context={
             "request": request,
             'strategy': strategy,
+            'positions': [p.as_json() for p in strategy.backtest.positions],
             'datasets': [{'name': dataset.name, 'id': idx} for idx, dataset in enumerate(datasets)]
         }
     )

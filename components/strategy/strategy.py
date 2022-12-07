@@ -228,7 +228,7 @@ class Strategy:
             side=side,
             quantity=quantity,
             price=price,
-            timestamp=self.data.datetime(),
+            timestamp=self.data.datetime(offset=1),
             data_index=self.data.get_index(),
             take_profit=round(take_profit, 2) if take_profit is not None else None,
             take_loss=round(take_loss, 2) if take_loss is not None else None,

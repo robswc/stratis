@@ -4,8 +4,14 @@ function createTraces(plotData, plotConfig, ohlc) {
     // create plot traces
     for (let i = 0; i < plotData.length; i++) {
         const plot = plotData[i];
-        console.log('VISIBLE', plotConfig[i]['visible'])
-        if (plotConfig[i]['visible']) {
+        let vis = true;
+        // plotConfig[i]['visible']
+        if (plotConfig[i]['name'] === 'atr_target' || plotConfig[i]['name'] === 'rma') {
+            vis = false
+        }
+        console.log(plotConfig[i]['name'])
+        console.log('VISIBLE is', vis)
+        if (vis) {
             plotTraces.push({
             x: unpack(ohlc, 'datetime'),
             y: plot,

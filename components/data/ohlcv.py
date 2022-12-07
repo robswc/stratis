@@ -130,7 +130,7 @@ class OHLCV(list):
             if offset:
                 raise ValueError('Offset not supported for as_list=True')
             return [row[column] for row in self.validated_data]
-        return self._ohlc()[column_int]
+        return self._ohlc(offset=offset)[column_int]
 
     def next(self):
         self._idx += 1
@@ -139,15 +139,15 @@ class OHLCV(list):
     def get_idx(self):
         return self._idx
 
-    def _ohlc(self):
+    def _ohlc(self, offset=0):
         try:
             ohlc = (
-                self.validated_data[self._idx]['open'],
-                self.validated_data[self._idx]['high'],
-                self.validated_data[self._idx]['low'],
-                self.validated_data[self._idx]['close'],
-                self.validated_data[self._idx]['volume'],
-                self.validated_data[self._idx]['datetime']
+                self.validated_data[self._idx + offset]['open'],
+                self.validated_data[self._idx + offset]['high'],
+                self.validated_data[self._idx + offset]['low'],
+                self.validated_data[self._idx + offset]['close'],
+                self.validated_data[self._idx + offset]['volume'],
+                self.validated_data[self._idx + offset]['datetime']
             )
             if ohlc:
                 ohlc = tuple(map(float, ohlc))
