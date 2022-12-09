@@ -86,6 +86,7 @@ class OHLCV(list):
         return self._load(csv_data, True)
 
     def from_api(self, dataset=None):
+        """Gets dataset from custom API endpoint, should be changed to suit your needs"""
         url = os.getenv('OHLCV_API_URL')
         r = requests.get(
             url=url,
