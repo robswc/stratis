@@ -1,4 +1,5 @@
 import csv
+import os
 
 import requests
 from loguru import logger
@@ -85,12 +86,12 @@ class OHLCV(list):
         return self._load(csv_data, True)
 
     def from_api(self, dataset=None):
-        url = 'http://192.168.0.216:5510/dataset/ohlc'
-        # url = 'http://127.0.0.1:8010/dataset/ohlc'
+        url = os.getenv('OHLCV_API_URL')
         r = requests.get(
             url=url,
             params={
-                'dataset': dataset}
+                'dataset': dataset
+            }
         )
         r.raise_for_status()
         data = r.json().get('data')
