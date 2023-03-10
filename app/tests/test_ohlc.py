@@ -1,5 +1,5 @@
 from components.ohlc import OHLC
-from components.symbol import Symbol
+from components.ohlc.symbol import Symbol
 
 
 class TestOHLC:
@@ -17,3 +17,26 @@ class TestOHLC:
         assert ohlc.head().shape == (5, 5)
         assert ohlc.tail().shape == (5, 5)
         assert ohlc.describe().shape == (8, 5)
+
+    def test_ohlc_getters(self):
+        ohlc = OHLC().from_csv('data/AAPL.csv', 'AAPL')
+        assert ohlc.open == 253.91
+        assert ohlc.high == 257.33
+        assert ohlc.low == 252.32
+        assert ohlc.close == 257.33
+        ohlc.advance_index()
+        assert ohlc.open == 257.17
+        assert ohlc.high == 257.67
+        assert ohlc.low == 256.48
+        assert ohlc.close == 257.07
+
+    def test_index(self):
+        ohlc = OHLC().from_csv('data/AAPL.csv', 'AAPL')
+        assert ohlc._index == 0
+        ohlc.advance_index()
+        assert ohlc._index == 1
+        ohlc.advance_index(2)
+        assert ohlc._index == 3
+        ohlc.reset_index()
+        assert ohlc._index == 0
+

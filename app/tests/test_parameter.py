@@ -35,8 +35,10 @@ class TestParameters:
 
     def test_params_str(self):
         int_param = IntegerParameter(1, 0, 10)
+        int_param.name = 'int_param'
         bool_param = BooleanParameter(True)
-        assert str(int_param) == '1 (min_value=0, max_value=10)'
-        assert str(bool_param) == 'True'
+        bool_param.name = 'bool_param'
+        assert str(int_param) == 'int_param : 1 (min_value=0, max_value=10)'
+        assert str(bool_param) == 'bool_param : True'
 
 

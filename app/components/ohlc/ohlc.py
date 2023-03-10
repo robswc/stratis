@@ -1,6 +1,6 @@
 import pandas as pd
 
-from components.symbol import Symbol
+from components.ohlc.symbol import Symbol
 
 
 class OHLC:
@@ -9,9 +9,50 @@ class OHLC:
     Wraps around a pandas dataframe.
     """
 
-    def __init__(self):
-        self.symbol = None
-        self.dataframe = None
+    def __init__(self, symbol: Symbol = None, dataframe: pd.DataFrame = None):
+        self.symbol = symbol
+        self.dataframe = dataframe
+        self._index = 0
+
+        # if a dataframe is provided, validate it
+        if dataframe is not None:
+            self._validate()
+
+    def advance_index(self, n: int = 1):
+        self._index += n
+
+    def reset_index(self):
+        self._index = 0
+
+    def _get_ohlc(self, column: str, index: int = None):
+        if index is None:
+            index = self._index
+        value = self.dataframe[column].iloc[index]
+        return value
+
+    @property
+    def open(self):
+        return self._get_ohlc('open')
+
+    @property
+    def high(self):
+        return self._get_ohlc('high')
+
+    @property
+    def low(self):
+        return self._get_ohlc('low')
+
+    @property
+    def close(self):
+        return self._get_ohlc('close')
+
+    @property
+    def volume(self):
+        return self.dataframe['volume']
+
+    @property
+    def timestamp(self):
+        return self.dataframe.index[self._index]
 
     def __str__(self):
         return f'OHLC: {self.symbol}'

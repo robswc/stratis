@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from components.ohlc import OHLC
 from components.parameter import BaseParameter, Parameter
@@ -16,7 +16,7 @@ class Strategy:
 
     def __init__(self):
         self.name = self.__class__.__name__
-        self.data = None
+        self.data: Union[OHLC, None] = None
         self._set_parameters()
 
         befores, steps, afters = extract_decorators(self)
@@ -49,6 +49,6 @@ class Strategy:
 
         # run step methods
         for i in range(len(self.data.dataframe)):
-            self._loop_index = i
             for method in self._step_methods:
                 getattr(self, method)()
+            self.data.advance_index()

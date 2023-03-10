@@ -12,6 +12,7 @@ class BaseParameter:
         kwargs_str = '' if len(kwargs) == 0 else f' ({", ".join(kwargs)})'
         return f'{self.name} : {value}{kwargs_str}'
 
+
 class Parameter:
     def __init__(self, value, *args, **kwargs):
         if isinstance(value, bool):
@@ -31,9 +32,6 @@ class Parameter:
 
     def __bool__(self):
         return bool(self.value)
-
-
-
 
 
 class IntegerParameter(BaseParameter):
@@ -81,5 +79,3 @@ class BooleanParameter(BaseParameter):
 
     def _validate(self):
         self.value = bool(self.value)
-
-

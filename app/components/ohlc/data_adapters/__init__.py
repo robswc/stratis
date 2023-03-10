@@ -1,0 +1,1 @@
+from components.ohlc.data_adapters.adapter import DataAdapter, CSVAdapter
