@@ -29,7 +29,7 @@ def import_all_strategies() -> List[Type[BaseStrategy]]:
 def register_all_strategies():
     strategies = import_all_strategies()
     for strategy in strategies:
-        strategy()
+        strategy.objects.register(strategy)
 
 
 loaded_strategies = import_all_strategies()

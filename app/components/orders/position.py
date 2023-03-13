@@ -1,18 +1,28 @@
+from typing import Optional
+
+from pydantic import BaseModel
+
+from components.orders.order import Order
+
+
 class PositionValidationException(Exception):
     pass
 
+class Position(BaseModel):
+    root_order: Order
 
-class Position:
-    def __init__(self, side: str, entry_price: float, qty: int):
-        self.side: str = side.lower()
-        self.entry_price: float = 0.0
-        self.qty: int = 0
-        self._validate()
+    def validate(self, **kwargs):
+        super().validate(**kwargs)
 
-    def _validate(self):
-        if self.side not in ['long', 'short']:
-            raise PositionValidationException(f'{self.side} is an invalid position side. Must be "long" or "short".')
-        if self.qty <= 0:
-            raise PositionValidationException(f'{self.qty} is an invalid position quantity. Must be greater than 0.')
-        if self.entry_price <= 0:
-            raise PositionValidationException(f'{self.entry_price} is an invalid position entry price. Must be greater than 0.')
+class BracketPosition(BaseModel):
+    take_profit: Optional[Order]
+    stop_loss: Optional[Order]
+
+    def validate(self, **kwargs):
+        super().validate(**kwargs)
+        # ensure that both take_profit and stop_loss are not None
+        if self.take_profit is None and self.stop_loss is None:
+            raise PositionValidationException('Both take_profit and stop_loss cannot be None.')
+        # ensure that all orders are of the same symbol
+        if self.take_profit.symbol != self.stop_loss.symbol:
+            raise PositionValidationException('All orders must be of the same symbol.')

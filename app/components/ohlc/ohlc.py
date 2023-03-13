@@ -2,6 +2,9 @@ import pandas as pd
 
 from components.ohlc.symbol import Symbol
 
+EMPTY_DATA = pd.DataFrame(columns=['open', 'high', 'low', 'close', 'volume', 'timestamp'])
+EMPTY_DATA.set_index('timestamp', inplace=True)
+
 
 class OHLC:
     """
@@ -11,6 +14,8 @@ class OHLC:
 
     def __init__(self, symbol: Symbol = None, dataframe: pd.DataFrame = None):
         self.symbol = symbol
+        if dataframe is None:
+            dataframe = EMPTY_DATA
         self.dataframe = dataframe
         self._index = 0
 
@@ -53,6 +58,9 @@ class OHLC:
     @property
     def timestamp(self):
         return self.dataframe.index[self._index]
+
+    def all(self, column: str):
+        return self.dataframe[column]
 
     def __str__(self):
         return f'OHLC: {self.symbol}'

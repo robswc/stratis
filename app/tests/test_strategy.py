@@ -17,8 +17,8 @@ class TestStrategy:
 
     def test_run_strategy(self):
         from storage.strategies.examples.sma_cross_over import SMACrossOver
-        strategy = SMACrossOver()
         ohlc = OHLC().from_csv(CSV_PATH, 'AAPL')
+        strategy = SMACrossOver(data=ohlc)
         strategy.run(
             data=ohlc,
         )

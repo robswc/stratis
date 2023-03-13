@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+from api.api_v1.api import api_router
+from utils import strategy_loader # noqa: F401
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World!"}
+app = FastAPI(
+    title="Stratis API",
+)
+
+app.include_router(api_router, prefix="/api/v1")

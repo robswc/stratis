@@ -1,19 +1,18 @@
-from abc import ABC
-
 from components import Parameter
 from components import Strategy, on_step
-from components.strategy.decorators import before
+from components.strategy import Series, ta
 
 
 class SMACrossOver(Strategy):
-    sma_fast = Parameter(10)
-    sma_slow = Parameter(20)
+    sma_fast_length = Parameter(10)
+    sma_slow_length = Parameter(60)
 
-    @before
-    def hello_world(self):
-        print('hello world!')
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # all_close = self.data.all('close')
+        # self.sma_fast = ta.sma(all_close, int(self.sma_fast_length))
+        # self.sma_slow = ta.sma(all_close, int(self.sma_slow_length))
 
-    @on_step
-    def check_for_crossover(self):
-        print('run!')
-        pass
+    # @on_step
+    # def check_for_crossover(self):
+    #     print(float(self.sma_fast), float(self.sma_slow))

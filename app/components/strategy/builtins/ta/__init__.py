@@ -1,0 +1,1 @@
+from components.strategy.builtins.ta.sma import *

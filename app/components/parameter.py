@@ -1,3 +1,13 @@
+from typing import Union
+
+from pydantic import BaseModel
+
+
+class ParameterModel(BaseModel):
+    name: str
+    value: Union[bool, int, float, str, None]
+
+
 class BaseParameter:
     def __init__(self):
         self.name = None
@@ -11,6 +21,12 @@ class BaseParameter:
         kwargs = [f'{k}={v}' for k, v in self.__dict__.items() if k != 'name' and k != 'value']
         kwargs_str = '' if len(kwargs) == 0 else f' ({", ".join(kwargs)})'
         return f'{self.name} : {value}{kwargs_str}'
+
+    def as_model(self):
+        return ParameterModel(
+            name=self.name,
+            value=self.value
+        )
 
 
 class Parameter:
