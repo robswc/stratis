@@ -27,7 +27,7 @@ class OHLCDemo(Strategy):
     @on_step  # the on_step decorator runs the function on every "step" of the OHLC data
     def print_ohlc(self):
 
-        # create shorthands for the OHLC data
+        # strategy shorthands for the OHLC data
         timestamp = self.data.timestamp
         close = self.data.close
 

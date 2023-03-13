@@ -1,11 +1,34 @@
+import inspect
+import sys
 from typing import List, Union
+
+from loguru import logger
 
 from components.ohlc import OHLC
 from components.parameter import BaseParameter, Parameter
 from components.strategy.decorators import extract_decorators
 
+class StrategyManager:
 
-class Strategy:
+    _strategies = []
+
+    @classmethod
+    def register(cls, strategy):
+        cls._strategies.append(strategy)
+        logger.debug(f'Registered strategy {strategy.name} ({strategy.__module__})')
+
+    @classmethod
+    def all(cls):
+        return cls._strategies
+
+    @classmethod
+    def get(cls, name):
+        for s in cls._strategies:
+            if s.name == name:
+                return s
+        raise Exception(f'No strategy found with name {name}')
+
+class BaseStrategy:
     parameters: List[BaseParameter] = []
     _loop_index = 0
 
@@ -13,6 +36,8 @@ class Strategy:
     _step_methods = []
     _before_methods = []
     _after_methods = []
+
+    objects = StrategyManager
 
     def __init__(self):
         self.name = self.__class__.__name__
@@ -23,6 +48,9 @@ class Strategy:
         self._before_methods = befores
         self._step_methods = steps
         self._after_methods = afters
+
+        # register the strategy
+        self.objects.register(self)
 
     def _set_parameters(self):
         # find all parameters in the class

@@ -24,14 +24,8 @@ class Parameter:
         else:
             raise ValueError('Invalid parameter type')
 
-    def __int__(self):
-        return int(self.value)
-
-    def __float__(self):
-        return float(self.value)
-
-    def __bool__(self):
-        return bool(self.value)
+    def __index__(self):
+        return self.value.__index__()
 
 
 class IntegerParameter(BaseParameter):
@@ -43,6 +37,9 @@ class IntegerParameter(BaseParameter):
 
     def __int__(self):
         return self.value
+
+    def __index__(self):
+        return int(self)
 
     def _validate(self):
         if self.value < self.min_value or self.value > self.max_value:
@@ -68,6 +65,9 @@ class FloatParameter(BaseParameter):
         # ensure value is a float
         self.value = float(self.value)
 
+    def __index__(self):
+        return float(self)
+
 
 class BooleanParameter(BaseParameter):
     def __init__(self, value: bool):
@@ -76,6 +76,9 @@ class BooleanParameter(BaseParameter):
 
     def __bool__(self):
         return self.value
+
+    def __index__(self):
+        return bool(self)
 
     def _validate(self):
         self.value = bool(self.value)

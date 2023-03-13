@@ -82,7 +82,7 @@ class OHLC:
         :return: self
         """
 
-        # create a symbol from the symbol string
+        # strategy a symbol from the symbol string
         self.symbol = Symbol(symbol)
 
         # load the data from the csv file

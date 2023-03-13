@@ -17,18 +17,18 @@ class APIDataAdapter(DataAdapter):
             raise Exception('DATA_API_URL not set')
 
         # you will have to modify this to get the data from the API, this is just an example
-        r = requests.get(f'{self.url}/{symbol}/ohlc/5?only_completed=true')
+        r = requests.get(f'{self.url}/data/{symbol}/ohlc/5?only_completed=true')
         r.raise_for_status()
         candles = r.json().get('candles', [])
 
-        # create a dataframe from the candles
+        # strategy a dataframe from the candles
         df = pd.DataFrame.from_records(candles)
         df.set_index('timestamp', inplace=True)
 
-        # create a symbol object
+        # strategy a symbol object
         symbol = Symbol(symbol)
 
-        # finally, create the OHLC object and return it
+        # finally, strategy the OHLC object and return it
         ohlc = OHLC(symbol=symbol, dataframe=df)
         return ohlc
 
