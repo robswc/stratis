@@ -9,10 +9,9 @@ from components.strategy.strategy import BaseStrategy
 
 def import_all_strategies() -> List[Type[BaseStrategy]]:
     strategies = []
-    # get all paths in the strategies folder, including subfolders, assuming sources root is app/
-    paths = Path(__file__).parent.parent.joinpath('storage/strategies').rglob('*.py')
+    app_path = Path(__file__).parent.parent.parent
+    paths = app_path.joinpath('storage/strategies').rglob('*.py')
     for path in paths:
-
         # get the module name from the path
         module_name = path.as_posix().replace('/', '.').replace('.py', '')
         module_name = module_name.split('app.')[1]

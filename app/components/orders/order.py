@@ -1,3 +1,5 @@
+import datetime
+import hashlib
 from enum import Enum
 from typing import Optional
 
@@ -30,6 +32,8 @@ class OrderSide(str, Enum):
     SELL = "sell"
 
 class Order(BaseModel):
+    id: Optional[str]
+    timestamp: Optional[int]
     symbol: str
     qty: Optional[float]
     notional: Optional[float]
@@ -38,12 +42,25 @@ class Order(BaseModel):
     time_in_force: TimeInForce = TimeInForce.GTC
     extended_hours: Optional[bool]
     client_order_id: Optional[str]
+    filled_avg_price: Optional[float]
     # take_profit: Optional[TakeProfitRequest]
     # stop_loss: Optional[StopLossRequest]
+
+    def __str__(self):
+        dt = datetime.datetime.fromtimestamp(self.timestamp).strftime("%Y-%m-%d %H:%M:%S")
+        return f'{self.type} {self.side} {self.qty} {self.symbol} @ {self.filled_avg_price} ({dt})'
+
+    def __hash__(self):
+        h = hashlib.sha256(f'{self.timestamp}{self.symbol}{self.qty}{self.side}{self.type}'.encode())
+        return int(h.hexdigest(), 16)
+
+    def get_id(self):
+        return hashlib.md5(str(hash(self)).encode()).hexdigest()
 
     class Config:
         schema_extra = {
             "example": {
+                "id": "b6b6b6b6-b6b6-b6b6-b6b6-b6b6b6b6b6b6",
                 "symbol": "AAPL",
                 "qty": 100,
                 "side": "buy",
@@ -61,3 +78,6 @@ class Order(BaseModel):
             raise OrderValidationError("qty must be greater than 0.")
         if self.notional is not None and self.notional <= 0:
             raise OrderValidationError("notional must be greater than 0.")
+
+        # if valid, set id
+        self.id = self.get_id()

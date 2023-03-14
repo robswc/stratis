@@ -1,6 +1,6 @@
 from components import Parameter
 from components import Strategy, on_step
-from components.strategy import Series, ta
+from components.strategy import ta
 
 
 class SMACrossOver(Strategy):
@@ -9,10 +9,11 @@ class SMACrossOver(Strategy):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # all_close = self.data.all('close')
-        # self.sma_fast = ta.sma(all_close, int(self.sma_fast_length))
-        # self.sma_slow = ta.sma(all_close, int(self.sma_slow_length))
+        all_close = self.data.all('close')
+        self.sma_fast = ta.sma(all_close, int(self.sma_fast_length))
+        self.sma_slow = ta.sma(all_close, int(self.sma_slow_length))
 
-    # @on_step
-    # def check_for_crossover(self):
-    #     print(float(self.sma_fast), float(self.sma_slow))
+    @on_step
+    def check_for_crossover(self):
+        # add logic to crossover here
+        pass

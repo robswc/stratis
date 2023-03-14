@@ -6,68 +6,50 @@ import pandas as pd
 from loguru import logger
 from pydantic import BaseModel
 
+from components.manager.manager import ComponentManager
 from components.ohlc import OHLC
 from components.orders.order_manager import OrderManager
 from components.parameter import BaseParameter, Parameter, ParameterModel
 from components.strategy.decorators import extract_decorators
 
+class StrategyManager(ComponentManager):
+    _components = []
 
 class StrategyModel(BaseModel):
     name: str
     parameters: List[ParameterModel]
 
-
-class StrategyManager:
-    _strategies = []
-
-    @classmethod
-    def register(cls, strategy):
-        # check if the strategy is already registered
-        if strategy in cls._strategies:
-            return
-        cls._strategies.append(strategy)
-        logger.debug(f'Registered strategy {cls.__name__} ({strategy.__module__})')
-
-    @classmethod
-    def all(cls):
-        return [s for s in cls._strategies]
-
-    @classmethod
-    def get(cls, name):
-        for s in cls._strategies:
-            if s.name == name:
-                return s
-        raise Exception(f'No strategy found with name {name}')
-
-
 class BaseStrategy:
-    parameters: List[BaseParameter] = []
-    _loop_index = 0
-
-    # strategy decorators
-    _step_methods = []
-    _before_methods = []
-    _after_methods = []
-
-    # each strategy gets a new order manager
-    orders = OrderManager()
-
     objects = StrategyManager
+
+    @classmethod
+    def register(cls):
+        cls.objects.register(cls)
 
     def __init__(self, data: Union[OHLC, None] = None):
         self.name = self.__class__.__name__
         if data is None:
             data = OHLC()
         self.data = data
+        self.parameters: List[BaseParameter] = []
         self._set_parameters()
 
-        # register the strategy
-        self.objects.register(self)
+        self.register()
+
+        self._loop_index = 0
+
+        # strategy decorators
+        self._step_methods = []
+        self._before_methods = []
+        self._after_methods = []
 
         befores, steps, afters = extract_decorators(self)
         self._before_methods = befores
         self._step_methods = steps
         self._after_methods = afters
+
+        # each strategy gets a new order manager
+        self.orders = OrderManager()
 
     def as_model(self) -> StrategyModel:
         return StrategyModel(

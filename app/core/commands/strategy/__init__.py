@@ -21,5 +21,4 @@ def list_strategies():
     List all strategies
     """
     typer.echo("Listing strategies")
-    from utils import strategy_loader  # noqa: F401
     ListStrategies().handle()

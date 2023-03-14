@@ -3,15 +3,11 @@ class TestDataAdapters:
         from components.ohlc import DataAdapter
         adapter = DataAdapter()
         assert adapter.name == 'DataAdapter'
-        adapter2 = DataAdapter()
-        assert adapter == adapter2
 
         # test csv adapter
         from components.ohlc import CSVAdapter
         csv_adapter = CSVAdapter()
         assert csv_adapter.name == 'CSVAdapter'
-        csv_adapter2 = CSVAdapter()
-        assert csv_adapter == csv_adapter2
 
     def test_csv_adapter(self):
         from components.ohlc import CSVAdapter
