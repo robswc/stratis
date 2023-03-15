@@ -8,6 +8,7 @@ from starlette.responses import Response
 from components import Strategy
 from components.backtest.backtest import BacktestResult
 from components.ohlc import DataAdapter
+from components.ohlc.symbol import Symbol
 
 router = APIRouter()
 
@@ -46,6 +47,7 @@ async def run_strategy(request: RunStrategyRequest):
     data_path = app_path / data
 
     ohlc = da.get_data(data_path, symbol="AAPL")
+
 
     backtest_result = strategy.run(data=ohlc)
     return backtest_result

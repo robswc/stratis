@@ -27,3 +27,8 @@ def before(func):
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)
     return wrapper
+
+def after(func):
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+    return wrapper

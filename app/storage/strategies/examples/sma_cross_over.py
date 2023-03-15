@@ -1,6 +1,8 @@
 from components import Parameter
 from components import Strategy, on_step
+from components.orders.order import Order
 from components.strategy import ta
+from components.strategy.decorators import after
 
 
 class SMACrossOver(Strategy):
@@ -16,4 +18,12 @@ class SMACrossOver(Strategy):
     @on_step
     def check_for_crossover(self):
         # add logic to crossover here
-        pass
+        cross = ta.logic.crossover(self.sma_fast, self.sma_slow)
+        if cross:
+            self.orders.market_order(side='buy', quantity=1)
+
+    @after
+    def print_orders(self):
+        print(self.orders.summary())
+        self.orders.show()
+

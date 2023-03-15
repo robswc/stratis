@@ -4,6 +4,8 @@ class Symbol:
     """
 
     def __init__(self, symbol: str):
+        if type(symbol) != str:
+            raise TypeError('Symbol must be a string.')
         self.symbol = symbol
 
     def __str__(self):

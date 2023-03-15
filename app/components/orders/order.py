@@ -3,7 +3,8 @@ import hashlib
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel
+from loguru import logger
+from pydantic import BaseModel, ValidationError, validator
 
 """
 Similar to Alpaca-py
@@ -11,6 +12,14 @@ Similar to Alpaca-py
 
 class OrderValidationError(Exception):
     pass
+
+def abbr_type(order_type):
+    if order_type == OrderType.MARKET:
+        return "mkt"
+    elif order_type == OrderType.LIMIT:
+        return "lmt"
+    elif order_type == OrderType.STOP:
+        return "stp"
 
 class TimeInForce(str, Enum):
     DAY = "day"
@@ -33,9 +42,9 @@ class OrderSide(str, Enum):
 
 class Order(BaseModel):
     id: Optional[str]
-    timestamp: Optional[int]
+    timestamp: int
     symbol: str
-    qty: Optional[float]
+    qty: Optional[int]
     notional: Optional[float]
     side: OrderSide
     type: OrderType
@@ -56,8 +65,10 @@ class Order(BaseModel):
         )
 
     def __str__(self):
-        dt = datetime.datetime.fromtimestamp(self.timestamp).strftime("%Y-%m-%d %H:%M:%S")
-        return f'{self.type} {self.side} {self.qty} {self.symbol} @ {self.filled_avg_price} ({dt})'
+        dt = datetime.datetime.fromtimestamp(self.timestamp / 1000).strftime("%Y-%m-%d %H:%M:%S")
+        order_type = abbr_type(self.type).upper()
+        side = self.side.upper()
+        return f'{order_type} {side} [{self.qty}] {self.symbol} @ {self.filled_avg_price}\t({dt})'
 
     def __hash__(self):
         h = hashlib.sha256(f'{self.timestamp}{self.symbol}{self.qty}{self.side}{self.type}'.encode())
@@ -78,15 +89,17 @@ class Order(BaseModel):
         }
 
     def __init__(self, **data):
-        super().__init__(**data)
-        if self.qty is None and self.notional is None:
-            raise OrderValidationError("Either qty or notional must be specified.")
-        if self.qty is not None and self.notional is not None:
-            raise OrderValidationError("Only one of qty or notional can be specified.")
-        if self.qty is not None and self.qty <= 0:
-            raise OrderValidationError("qty must be greater than 0.")
-        if self.notional is not None and self.notional <= 0:
-            raise OrderValidationError("notional must be greater than 0.")
+        try:
+            super().__init__(**data)
+        except ValidationError as e:
+            logger.error(e)
+            raise e
+
 
         # if valid, set id
         self.id = self.get_id()
+
+    @validator('qty')
+    def qty_must_be_positive(cls, v):
+        assert v > 0, 'qty must be positive'
+        return v

@@ -29,15 +29,23 @@ class BaseStrategy:
 
     def __init__(self, data: Union[OHLC, None] = None):
         self.name = self.__class__.__name__
+
+        # handle data
         if data is None:
             data = OHLC()
         self.data = data
+        self._loop_index = 0
+
+        # create a shortcut to the symbol
+        print(self.data.symbol)
+        self.symbol = data.symbol
+
+        # handle parameters
         self.parameters: List[BaseParameter] = []
         self._set_parameters()
 
         self.register()
 
-        self._loop_index = 0
 
         # strategy decorators
         self._step_methods = []
@@ -50,7 +58,7 @@ class BaseStrategy:
         self._after_methods = afters
 
         # each strategy gets a new order manager
-        self.orders = OrderManager()
+        self.orders = OrderManager(self)
 
     def as_model(self) -> StrategyModel:
         return StrategyModel(
@@ -88,7 +96,8 @@ class BaseStrategy:
     def _create_series(self):
         for attr in dir(self):
             if isinstance(self.__getattribute__(attr), list):
-                sys.modules['components.strategy.series'].Series(self.__getattribute__(attr))
+                if attr not in ['_before_methods', '_step_methods', '_after_methods', 'parameters']:
+                    sys.modules['components.strategy.series'].Series(self.__getattribute__(attr))
             if isinstance(self.__getattribute__(attr), pd.Series):
                 sys.modules['components.strategy.series'].Series(self.__getattribute__(attr).to_list())
 
@@ -100,6 +109,7 @@ class BaseStrategy:
         return series
 
     def run(self, data: OHLC, parameters: dict = None):
+        self.__init__(data=data)
         self._setup_data(data)
         self._create_series()
 
@@ -127,6 +137,10 @@ class BaseStrategy:
 
         # runs the backtest
         b.test()
+
+        # run after methods
+        for method in self._after_methods:
+            getattr(self, method)()
 
         # return the results of the backtest
         return b.result
