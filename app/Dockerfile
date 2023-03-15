@@ -1,9 +1,9 @@
 FROM python:3.10
 
-COPY /app/requirements.txt /tmp/requirements.txt
+COPY requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 
-COPY app /app
+COPY . /app
 WORKDIR /app
 
 EXPOSE 8000

@@ -46,6 +46,15 @@ class Order(BaseModel):
     # take_profit: Optional[TakeProfitRequest]
     # stop_loss: Optional[StopLossRequest]
 
+    @staticmethod
+    def create_market_order(symbol: str, qty: float, side: OrderSide):
+        return Order(
+            symbol=symbol,
+            qty=qty,
+            side=side,
+            type=OrderType.MARKET,
+        )
+
     def __str__(self):
         dt = datetime.datetime.fromtimestamp(self.timestamp).strftime("%Y-%m-%d %H:%M:%S")
         return f'{self.type} {self.side} {self.qty} {self.symbol} @ {self.filled_avg_price} ({dt})'

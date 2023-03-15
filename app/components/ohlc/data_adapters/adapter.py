@@ -17,7 +17,6 @@ class DataAdapter:
 
     def __init__(self):
         self.name = self.__class__.__name__
-        self.objects.register(self)
 
         # register
         self.register()
@@ -29,7 +28,7 @@ class DataAdapter:
 class CSVAdapter(DataAdapter):
     """CSV Adapter, loads data from a csv file."""
 
-    def get_data(self, path: str, symbol: str):
+    def get_data(self, path: str, symbol: str = None):
         """
         Loads data from a csv file.
         :param path: path to csv file
@@ -37,6 +36,11 @@ class CSVAdapter(DataAdapter):
         :return: OHLC object
         """
         from components.ohlc import OHLC
+
+        if symbol is None:
+            logger.warning('No symbol provided, using filename as symbol.')
+            symbol = path.split('/')[-1].split('.')[0]
+
         return OHLC().from_csv(path, symbol)
 
 

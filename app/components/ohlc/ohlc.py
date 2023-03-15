@@ -100,3 +100,8 @@ class OHLC:
         self._validate()
 
         return self
+
+    def to_dict(self):
+        df = self.dataframe.copy()
+        df['time'] = df.index
+        return df.to_dict(orient='records')

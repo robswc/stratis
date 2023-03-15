@@ -6,6 +6,7 @@ import pandas as pd
 from loguru import logger
 from pydantic import BaseModel
 
+from components.backtest.backtest import Backtest
 from components.manager.manager import ComponentManager
 from components.ohlc import OHLC
 from components.orders.order_manager import OrderManager
@@ -117,3 +118,17 @@ class BaseStrategy:
 
             # advance the index of the data
             self.data.advance_index()
+
+        # handle backtest
+        b = Backtest(
+            strategy=self,
+            data=data,
+        )
+
+        # runs the backtest
+        b.test()
+
+        # return the results of the backtest
+        return b.result
+
+
