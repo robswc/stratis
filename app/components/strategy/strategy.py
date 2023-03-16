@@ -1,4 +1,5 @@
 import inspect
+import json
 import sys
 from typing import List, Union
 
@@ -12,6 +13,24 @@ from components.ohlc import OHLC
 from components.orders.order_manager import OrderManager
 from components.parameter import BaseParameter, Parameter, ParameterModel
 from components.strategy.decorators import extract_decorators
+
+class PlotConfig(BaseModel):
+    color: str = 'blue'
+    type: str = 'line'
+    lineWidth: int = 1
+
+class Plot:
+    def __init__(self, series: 'Series', **kwargs):
+        self.data = series.as_list()
+        self.name = kwargs.get('name', None)
+        self.config = PlotConfig(**kwargs)
+
+    def as_dict(self):
+        return {
+            'name': self.name,
+            'data': self.data,
+            'config': self.config.dict()
+        }
 
 class StrategyManager(ComponentManager):
     _components = []
@@ -59,6 +78,13 @@ class BaseStrategy:
 
         # each strategy gets a new order manager
         self.orders = OrderManager(self)
+
+        # each strategy gets plots
+        self.plots = []
+
+    def export_plots(self, plots: List[Plot]):
+        self.plots = plots
+
 
     def as_model(self) -> StrategyModel:
         return StrategyModel(
@@ -108,7 +134,22 @@ class BaseStrategy:
                 series.append(self.__getattribute__(attr))
         return series
 
-    def run(self, data: OHLC, parameters: dict = None):
+    def _get_all_plots(self):
+        # will use in the future to get all plots
+        plots = []
+        for attr in dir(self):
+            if isinstance(self.__getattribute__(attr), Plot):
+                plots.append(self.__getattribute__(attr))
+        return plots
+
+    def run(self, data: OHLC, parameters: dict = None, **kwargs):
+
+        # set parameters
+        if parameters is not None:
+            for p in self.parameters:
+                if p.name in parameters:
+                    p.value = parameters[p.name]
+
         self.__init__(data=data)
         self._setup_data(data)
         self._create_series()
@@ -130,10 +171,7 @@ class BaseStrategy:
             self.data.advance_index()
 
         # handle backtest
-        b = Backtest(
-            strategy=self,
-            data=data,
-        )
+        b = Backtest(strategy=self, data=data)
 
         # runs the backtest
         b.test()
@@ -142,7 +180,12 @@ class BaseStrategy:
         for method in self._after_methods:
             getattr(self, method)()
 
-        # return the results of the backtest
+        # get all plots
+        plots = self.plots
+
+        if kwargs.get('plots', False):
+            logger.debug(f'Requested plots, found {len(plots)}')
+            return b.result, plots
         return b.result
 
 

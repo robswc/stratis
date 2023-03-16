@@ -12,6 +12,15 @@ class Series:
     def advance_index(self):
         self._loop_index += 1
 
+    def as_list(self):
+        if isinstance(self._data, list):
+            return self._data
+        if isinstance(self._data, pd.Series):
+            df = self._data.copy()
+            # replace NaN with previous value
+            df.fillna(method='backfill', inplace=True)
+            return df.tolist()
+
     def __repr__(self):
         return str(float(self))
 

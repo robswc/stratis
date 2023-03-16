@@ -44,7 +44,7 @@ class Order(BaseModel):
     id: Optional[str]
     timestamp: int
     symbol: str
-    qty: Optional[int]
+    qty: int
     notional: Optional[float]
     side: OrderSide
     type: OrderType

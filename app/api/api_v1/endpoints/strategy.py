@@ -14,6 +14,7 @@ router = APIRouter()
 
 class RunStrategyRequest(BaseModel):
     strategy: str
+    parameters: List[dict]
     adapter: str
     data: str
 
@@ -32,22 +33,28 @@ async def get_strategy(name: str):
     except ValueError:
         return Response(status_code=404)
 
-@router.post("/", response_model=BacktestResult)
+class RunStrategyResponse(BaseModel):
+    backtest: BacktestResult
+    plots: List[dict]
+
+@router.post("/", response_model=RunStrategyResponse)
 async def run_strategy(request: RunStrategyRequest):
     """Run a strategy with data"""
+
+    # get arguments from request
     name = request.strategy
     data_adapter_name = request.adapter
     data = str(request.data)
+    parameters = {p['name']: p['value'] for p in request.parameters}
 
+    # get strategy and data adapter
     da = DataAdapter.objects.get(name=data_adapter_name)
     strategy = Strategy.objects.get(name=name)
 
-    # start from app root
+    # start from app root, get data
     app_path = Path(__file__).parent.parent.parent.parent
     data_path = app_path / data
-
     ohlc = da.get_data(data_path, symbol="AAPL")
 
-
-    backtest_result = strategy.run(data=ohlc)
-    return backtest_result
+    backtest_result, plots = strategy.run(data=ohlc, parameters=parameters, plots=True)
+    return RunStrategyResponse(backtest=backtest_result, plots=[p.as_dict() for p in plots])

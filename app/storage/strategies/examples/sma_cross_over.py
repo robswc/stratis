@@ -3,6 +3,7 @@ from components import Strategy, on_step
 from components.orders.order import Order
 from components.strategy import ta
 from components.strategy.decorators import after
+from components.strategy.strategy import Plot
 
 
 class SMACrossOver(Strategy):
@@ -18,12 +19,16 @@ class SMACrossOver(Strategy):
     @on_step
     def check_for_crossover(self):
         # add logic to crossover here
-        cross = ta.logic.crossover(self.sma_fast, self.sma_slow)
-        if cross:
+        cross_over = ta.logic.crossover(self.sma_fast, self.sma_slow)
+        cross_under = ta.logic.crossunder(self.sma_fast, self.sma_slow)
+        if cross_over:
             self.orders.market_order(side='buy', quantity=1)
+        elif cross_under:
+            self.orders.market_order(side='sell', quantity=1)
 
     @after
-    def print_orders(self):
-        print(self.orders.summary())
-        self.orders.show()
+    def create_plots(self):
+        p1 = Plot(self.sma_fast, name='sma_fast')
+        p2 = Plot(self.sma_slow, name='sma_slow')
+        self.export_plots([p1, p2])
 

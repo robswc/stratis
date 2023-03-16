@@ -7,8 +7,8 @@ from components.orders.order import Order, OrderSide as Side, OrderType
 
 TIMESTAMP = int(datetime.now().timestamp())
 
-class TestOrders:
 
+class TestOrders:
 
     def test_hashing(self):
         fake_order_1 = Order(
@@ -41,7 +41,7 @@ class TestOrders:
         assert fake_order_1.get_id() == fake_order_2.get_id()
         assert fake_order_1.get_id() != fake_order_3.get_id()
 
-    def test_order_validation_qty(self):
+    def test_order_validation(self):
         # valid orders
         Order(
             symbol='BTCUSDT',
@@ -51,26 +51,22 @@ class TestOrders:
             qty=1,
         )
 
-        # invalid orders
-        with pytest.raises(ValidationError):
-            Order(symbol='BTCUSDT', side=Side.BUY, type=OrderType.MARKET, timestamp=TIMESTAMP, qty=0)
+        # pytest, test several invalid orders to ensure they all raise a ValidationError
+        invalid_orders = [
+            # missing symbol
+            {"side": Side.BUY, "type": OrderType.MARKET, "timestamp": TIMESTAMP, "qty": 1},
+            # missing side
+            {"symbol": "BTCUSDT", "type": OrderType.MARKET, "timestamp": TIMESTAMP, "qty": 1},
+            # missing type
+            {"symbol": "BTCUSDT", "side": Side.BUY, "timestamp": TIMESTAMP, "qty": 1},
+            # missing timestamp
+            {"symbol": "BTCUSDT", "side": Side.BUY, "type": OrderType.MARKET, "qty": 1},
+            # missing qty
+            {"symbol": "BTCUSDT", "side": Side.BUY, "type": OrderType.MARKET, "timestamp": TIMESTAMP},
+        ]
 
-        with pytest.raises(ValidationError):
-            Order(symbol='BTCUSDT', side=Side.BUY, type=OrderType.MARKET, timestamp=TIMESTAMP, qty=None)
+        for data in invalid_orders:
+            with pytest.raises(ValidationError):
+                Order(**data)
 
-        with pytest.raises(ValidationError):
-            Order(symbol='BTCUSDT', side=Side.BUY, type=OrderType.MARKET, timestamp=TIMESTAMP, qty=-1)
 
-    def test_order_validation_side(self):
-        # valid order
-        Order(symbol='BTCUSDT', side=Side.BUY, type=OrderType.MARKET, timestamp=TIMESTAMP, qty=1)
-
-        with pytest.raises(ValidationError):
-            Order(symbol='BTCUSDT', side='invalid', type=OrderType.MARKET, timestamp=TIMESTAMP, qty=1)
-
-    def test_order_validation_type(self):
-        # valid order
-        Order(symbol='BTCUSDT', side=Side.BUY, type=OrderType.MARKET, timestamp=TIMESTAMP, qty=1)
-
-        with pytest.raises(ValidationError):
-            Order(symbol='BTCUSDT', side=Side.BUY, type='invalid', timestamp=TIMESTAMP, qty=1)
