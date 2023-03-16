@@ -45,7 +45,7 @@ async def run_strategy(request: RunStrategyRequest):
     name = request.strategy
     data_adapter_name = request.adapter
     data = str(request.data)
-    parameters = {p['name']: p['value'] for p in request.parameters}
+    parameters = {p['name']: p['value'] for p in request.parameters} if request.parameters else {}
 
     # get strategy and data adapter
     da = DataAdapter.objects.get(name=data_adapter_name)

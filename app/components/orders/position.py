@@ -9,90 +9,72 @@ from components.orders.order import Order
 class PositionValidationException(Exception):
     pass
 
+
 class PositionClosedException(Exception):
     pass
+
+
+class PositionEffect:
+    REDUCE = 'reduce'
+    ADD = 'add'
+
 
 class Position(BaseModel):
     orders: List[Order] = []
     closed: bool = False
+    cost_basis: Optional[float] = None
     average_entry_price: Optional[float] = None
     average_exit_price: Optional[float] = None
-    size: Optional[int] = None
+    size: Optional[int] = 0
     side: Optional[str] = None
+    unrealized_pnl: Optional[float] = None
     pnl: Optional[float] = None
     timestamp: Optional[int] = None
 
-    # TODO: restructure position to be more efficient
+    def _get_effect(self, order: Order):
+        print('getting effect...', abs(self.size), abs(self.size + order.qty))
+        if abs(self.size) < abs(self.size + order.qty):
+            return PositionEffect.ADD
+        else:
+            return PositionEffect.REDUCE
 
     def test(self, ohlc: 'OHLC'):
-        self.pnl = self.calc_pnl()
+        for o in self.orders:
+            print(self.handle_order(o))
 
-    def add_order(self, order: Order):
+    def add_closing_order(self):
+        # creates and adds a closing order to the position
         if self.closed:
             raise PositionClosedException('Position is already closed')
 
-        # else we add the order
+        # create order
+        order = Order(
+            order_type='market',
+            side='buy' if self.side == 'sell' else 'sell',
+            quantity=self.size,
+            symbol=self.orders[0].symbol,
+            timestamp=self.timestamp,
+        )
+
         self.orders.append(order)
 
-        long_qty = sum([o.qty for o in self.orders if o.side == 'buy'])
-        short_qty = sum([o.qty for o in self.orders if o.side == 'sell'])
-        self.closed = long_qty == short_qty
+    def handle_order(self, order):
+        effect = self._get_effect(order)
 
-    def get_size(self):
-        return sum([order.qty for order in self.orders])
+        if effect == PositionEffect.ADD:
+            print('order is add')
+            # since the position is added, we need to calculate the cost basis
+            self.cost_basis += order.price * order.qty
+            self.average_entry_price = self.cost_basis / (self.size + order.qty)
 
-    def get_all_buy_orders(self):
-        return [order for order in self.orders if order.side == 'buy']
+        if effect == PositionEffect.REDUCE:
+            print('order is reduce')
+            # since the position is reduced, we need to calculate the realized pnl
+            realized_pnl = (order.price - self.average_entry_price) * (order.qty * -1 if self.size > 0 else order.qty)
+            self.pnl += realized_pnl
 
-    def get_all_sell_orders(self):
-        return [order for order in self.orders if order.side == 'sell']
-
-    def get_average_entry_price(self):
-        if self.orders[0].side == 'buy':
-            return sum([o.filled_avg_price for o in self.get_all_buy_orders()]) / len(self.get_all_buy_orders())
-        else:
-            return sum([o.filled_avg_price for o in self.get_all_sell_orders()]) / len(self.get_all_sell_orders())
-
-    def get_average_exit_price(self):
-        if self.orders[0].side == 'buy':
-            return sum([o.filled_avg_price for o in self.get_all_sell_orders()]) / len(self.get_all_sell_orders())
-        else:
-            return sum([o.filled_avg_price for o in self.get_all_buy_orders()]) / len(self.get_all_buy_orders())
-
-    def get_side(self):
-        return self.orders[0].side
-
-    def get_timestamp(self):
-        return self.orders[-1].timestamp
-
-    def calc_pnl(self):
-        if self.closed:
-            # root order direction
-            root_order_side = self.orders[0].side
-
-            # calculate pnl
-            if root_order_side == 'buy':
-                return (self.get_average_exit_price() - self.get_average_entry_price()) * self.get_size()
-            else:
-                return (self.get_average_entry_price() - self.get_average_exit_price()) * self.get_size()
-        return 0
-
-    def dict(self, **kwargs):
-        d = super().dict(**kwargs)
-        if self.closed:
-            d['average_entry_price'] = self.get_average_entry_price()
-            d['average_exit_price'] = self.get_average_exit_price()
-            d['size'] = self.get_size() / 2
-            d['side'] = self.get_side()
-            d['timestamp'] = self.get_timestamp()
-            d['pnl'] = self.calc_pnl()
-        else:
-            d['average_entry_price'] = self.get_average_entry_price()
-            d['size'] = self.get_size()
-            d['side'] = self.get_side()
-            d['timestamp'] = self.get_timestamp()
-            d['pnl'] = self.calc_pnl()
-        return d
+        self.size += order.qty
+        self.closed = self.size == 0  # if size is 0, position is closed
 
 
 class BracketPosition(BaseModel):

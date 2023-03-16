@@ -46,33 +46,12 @@ class Backtest:
     def test(self):
         logger.debug(f'Starting backtest for strategy {self.strategy.name}')
 
+        positions = self.strategy.positions.all()
+        orders = self.strategy.orders.all()
 
-        # sort orders by timestamp
-        sorted_orders = self._sort_orders(self.strategy.orders.all())
-
-        # positions
-        positions = []
-        last_position = None
-
-        # build the positions
-        for order in sorted_orders:
-            # main logic
-            try:
-                last_position.add_order(order)
-            except PositionClosedException:
-                p = Position()
-                p.add_order(order)
-                positions.append(p)
-                last_position = p
-            except AttributeError:
-                p = Position()
-                p.add_order(order)
-                positions.append(p)
-                last_position = p
-
-        # loop through each position
-        for position in positions:
-            position.test(ohlc=self.data)
+        for p in positions:
+            p.test(ohlc=self.data)
+            print(str(p))
 
         # calculate win/loss ratio
         losing_trades = len([position for position in positions if position.pnl < 0])

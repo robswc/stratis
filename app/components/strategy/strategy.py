@@ -11,6 +11,7 @@ from components.backtest.backtest import Backtest
 from components.manager.manager import ComponentManager
 from components.ohlc import OHLC
 from components.orders.order_manager import OrderManager
+from components.orders.position_manager import PositionManager
 from components.parameter import BaseParameter, Parameter, ParameterModel
 from components.strategy.decorators import extract_decorators
 
@@ -76,8 +77,9 @@ class BaseStrategy:
         self._step_methods = steps
         self._after_methods = afters
 
-        # each strategy gets a new order manager
-        self.orders = OrderManager(self)
+        # each strategy gets a new order and position manager
+        self.orders = OrderManager(self)  # eventually all orders will be converted to positions
+        self.positions = PositionManager(self)
 
         # each strategy gets plots
         self.plots = []

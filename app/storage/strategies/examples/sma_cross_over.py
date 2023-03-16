@@ -22,9 +22,11 @@ class SMACrossOver(Strategy):
         cross_over = ta.logic.crossover(self.sma_fast, self.sma_slow)
         cross_under = ta.logic.crossunder(self.sma_fast, self.sma_slow)
         if cross_over:
-            self.orders.market_order(side='buy', quantity=1)
+            # self.orders.market_order(side='buy', quantity=1)
+            self.positions.open(side='buy', quantity=1)
         elif cross_under:
-            self.orders.market_order(side='sell', quantity=1)
+            # self.orders.market_order(side='sell', quantity=1)
+            self.positions.close()
 
     @after
     def create_plots(self):
