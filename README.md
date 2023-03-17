@@ -50,7 +50,9 @@ strategy = OHLCDemo().run(data)
 ## Installation
 
 It is heavily recommended to use Docker to run stratis.  This is because stratis requires a number of dependencies that
-can be difficult to install.  To install Docker, follow the instructions [here](https://docs.docker.com/get-docker/).
+can be difficult to install.  
+
+To install Docker, follow the instructions [here](https://docs.docker.com/get-docker/).
 
 Once Docker is installed, you can run stratis by running the following command:
 
@@ -63,4 +65,18 @@ cd stratis
 
 # Run the docker-compose file
 docker-compose up -d # -d runs the container in the background
+```
+
+For more advanced usage, you can run app with python directly.  To do this, you will need to install the dependencies
+listed in the `requirements.txt` file.  You can do this by running the following command:
+
+```bash
+pip install -r app/requirements.txt
+```
+
+You can now run the app by running the following command:
+
+```bash
+cd app  # change directory to the app folder
+python python -m uvicorn main:app --reload  # reloads the app on file changes (useful for development)
 ```
