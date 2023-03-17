@@ -49,9 +49,14 @@ class Backtest:
         positions = self.strategy.positions.all()
         orders = self.strategy.orders.all()
 
+
         for p in positions:
             p.test(ohlc=self.data)
             print(str(p))
+
+        all_position_orders = []
+        for p in positions:
+            all_position_orders += p.orders
 
         # calculate win/loss ratio
         losing_trades = len([p for p in positions if p.pnl < 0])
@@ -66,5 +71,5 @@ class Backtest:
             winning_trades=winning_trades,
             losing_trades=losing_trades,
             positions=positions,
-            orders=self.strategy.orders.all(),
+            orders=orders + all_position_orders,
         )

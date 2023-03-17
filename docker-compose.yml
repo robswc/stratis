@@ -13,5 +13,8 @@ services:
     build:
       context: ./ui
       dockerfile: Dockerfile
+    environment:
+        - NEXT_PUBLIC_BACKEND_URL=http://app
+        - NEXT_PUBLIC_BACKEND_PORT=8000
     ports:
       - "3000:3000"
