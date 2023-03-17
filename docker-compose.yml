@@ -7,14 +7,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
-  stratis-ui:
+  stratis-next-js:
     depends_on:
       - app
     build:
       context: ./ui
       dockerfile: Dockerfile
-      args:
-        - BACKEND_URL=http://app
-        - BACKEND_PORT=8000
     ports:
       - "3000:3000"
