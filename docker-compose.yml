@@ -13,8 +13,8 @@ services:
     build:
       context: ./ui
       dockerfile: Dockerfile
-    environment:
-        - BACKEND_URL="http://app"
+      args:
+        - BACKEND_URL=http://app
         - BACKEND_PORT=8000
     ports:
       - "3000:3000"
