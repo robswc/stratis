@@ -67,6 +67,12 @@ class Position(BaseModel):
         self.orders.append(order)
 
     def handle_order(self, order: Order):
+
+        # if the position is missing a side, set it to the side of the first order
+        if self.side is None:
+            self.side = order.side
+
+        # gets the position effect, either add or reduce
         effect = self._get_effect(order)
 
         if effect == PositionEffect.ADD:
