@@ -22,5 +22,6 @@ jobs:
           pip install pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Test with pytest
+        working-directory: ./app
         run: |
-          pytest app/tests --no-header --no-summary -q in app
+          pytest ./test --no-header --no-summary -q in app
