@@ -12,6 +12,9 @@ class PositionManager:
     def open(self, order_type: str, side: str, quantity: int):
         """Opens a new position"""
 
+        # get the timestamp (it's offset by 1 because we're using the previous close)
+        timestamp = self._strategy.data.get_timestamp(offset=1)
+
         # create order
         order = Order(
             type=order_type,
@@ -19,7 +22,7 @@ class PositionManager:
             qty=quantity,
             symbol=self._strategy.symbol.symbol,
             filled_avg_price=self._strategy.data.close,
-            timestamp=self._strategy.data.timestamp,
+            timestamp=timestamp
         )
 
         self.positions.append(

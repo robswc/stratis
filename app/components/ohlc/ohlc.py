@@ -59,6 +59,9 @@ class OHLC:
     def timestamp(self):
         return self.dataframe.index[self._index]
 
+    def get_timestamp(self, offset: int = 0):
+        return self.dataframe.index[self._index + offset]
+
     def all(self, column: str):
         return self.dataframe[column]
 

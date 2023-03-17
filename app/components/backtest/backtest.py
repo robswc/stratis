@@ -1,3 +1,4 @@
+import concurrent.futures
 from typing import Optional, List
 
 from loguru import logger
@@ -50,9 +51,20 @@ class Backtest:
         orders = self.strategy.orders.all()
 
 
-        for p in positions:
-            p.test(ohlc=self.data)
-            print(str(p))
+        # use concurrent futures to test orders in parallel
+
+        # original code
+        # for p in positions:
+        #     p.test(ohlc=self.data)
+        #     print(str(p))
+
+        # new code
+        logger.debug(f'Testing {len(positions)} positions in parallel...')
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            for p in positions:
+                executor.submit(p.test, self.data)
+        logger.debug(f'Finished testing {len(positions)} positions in parallel.')
+
 
         all_position_orders = []
         for p in positions:
