@@ -1,17 +1,32 @@
-- name: Run pytest
-  # You may pin to the exact commit or the version.
-  # uses: pavelzw/pytest-action@99552c37a65b8b15daa244f477fd88660a2ae95e
-  uses: pavelzw/pytest-action@v2.0.0
-  with:
-    # Print a GitHub job summary
-    job-summary: # optional, default is true
-    # Verbose output
-    verbose: # optional, default is true
-    # Use emojis in the output
-    emoji: # optional, default is true
-    # Custom arguments to pass to pytest
-    custom-arguments: # optional, default is 
-    # Title of the report
-    report-title: # optional, default is Test Report
-    # Add 'Click to expand' to the report
-    click-to-expand: # optional, default is true
+name: Python package
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Test with pytest
+        run: |
+          pytest
