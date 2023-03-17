@@ -18,6 +18,7 @@ class PositionManager:
             side=side,
             qty=quantity,
             symbol=self._strategy.symbol.symbol,
+            filled_avg_price=self._strategy.data.close,
             timestamp=self._strategy.data.timestamp,
         )
 
@@ -29,7 +30,7 @@ class PositionManager:
 
     def close(self):
         """Closes the most recent position"""
-        self.positions[-1].add_closing_order()
+        self.positions[-1].add_closing_order(ohlc=self._strategy.data)
 
     def all(self):
         return self.positions

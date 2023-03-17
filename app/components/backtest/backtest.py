@@ -54,8 +54,8 @@ class Backtest:
             print(str(p))
 
         # calculate win/loss ratio
-        losing_trades = len([position for position in positions if position.pnl < 0])
-        winning_trades = len([position for position in positions if position.pnl > 0])
+        losing_trades = len([p for p in positions if p.pnl < 0])
+        winning_trades = len([p for p in positions if p.pnl > 0])
         wl_ratio = round(winning_trades / losing_trades, 2) if losing_trades > 0 else 0 if winning_trades == 0 else 1
 
         # create backtest result

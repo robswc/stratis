@@ -100,6 +100,6 @@ class Order(BaseModel):
         self.id = self.get_id()
 
     @validator('qty')
-    def qty_must_be_positive(cls, v):
-        assert v > 0, 'qty must be positive'
+    def qty_must_be_int(cls, v):
+        assert v != 0, 'qty cannot be 0'
         return v
