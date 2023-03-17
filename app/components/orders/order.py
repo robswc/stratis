@@ -10,8 +10,10 @@ from pydantic import BaseModel, ValidationError, validator
 Similar to Alpaca-py
 """
 
+
 class OrderValidationError(Exception):
     pass
+
 
 def abbr_type(order_type):
     if order_type == OrderType.MARKET:
@@ -21,6 +23,7 @@ def abbr_type(order_type):
     elif order_type == OrderType.STOP:
         return "stp"
 
+
 class TimeInForce(str, Enum):
     DAY = "day"
     GTC = "gtc"
@@ -29,6 +32,7 @@ class TimeInForce(str, Enum):
     IOC = "ioc"
     FOK = "fok"
 
+
 class OrderType(str, Enum):
     MARKET = "market"
     LIMIT = "limit"
@@ -36,9 +40,11 @@ class OrderType(str, Enum):
     STOP_LIMIT = "stop_limit"
     TRAILING_STOP = "trailing_stop"
 
+
 class OrderSide(str, Enum):
     BUY = "buy"
     SELL = "sell"
+
 
 class Order(BaseModel):
     id: Optional[str]
@@ -52,6 +58,7 @@ class Order(BaseModel):
     extended_hours: Optional[bool]
     client_order_id: Optional[str]
     filled_avg_price: Optional[float]
+
     # take_profit: Optional[TakeProfitRequest]
     # stop_loss: Optional[StopLossRequest]
 
@@ -77,6 +84,11 @@ class Order(BaseModel):
     def get_id(self):
         return hashlib.md5(str(hash(self)).encode()).hexdigest()
 
+    # will eventually make this a proper attribute
+    @property
+    def price(self):
+        return self.filled_avg_price
+
     class Config:
         schema_extra = {
             "example": {
@@ -94,7 +106,6 @@ class Order(BaseModel):
         except ValidationError as e:
             logger.error(e)
             raise e
-
 
         # if valid, set id
         self.id = self.get_id()

@@ -1,6 +1,7 @@
 import random
 from typing import Optional, List
 
+from loguru import logger
 from pydantic import BaseModel
 
 from components.orders.order import Order
@@ -35,6 +36,7 @@ class Position(BaseModel):
 
     def _get_effect(self, order: Order):
         """Get the effect of an order on a position."""
+        print(self.size, self.size + order.qty)
         if abs(self.size) < abs(self.size + order.qty):
             return PositionEffect.ADD
         else:
@@ -44,7 +46,7 @@ class Position(BaseModel):
         """Get the size of all orders in the position."""
         return sum([o.qty for o in self.orders])
 
-    def test(self, ohlc: 'OHLC'):
+    def test(self, ohlc: 'OHLC' = None):
         # iterate over all orders, handling each one
         for o in self.orders:
             self.handle_order(o)
@@ -68,6 +70,10 @@ class Position(BaseModel):
 
     def handle_order(self, order: Order):
 
+        if order.type == 'stop':
+            logger.warning('Stop orders are not yet supported!')
+            return
+
         # if the position is missing a side, set it to the side of the first order
         if self.side is None:
             self.side = order.side
@@ -76,6 +82,7 @@ class Position(BaseModel):
         effect = self._get_effect(order)
 
         if effect == PositionEffect.ADD:
+            print('add')
             # if the position is opened, set the opened timestamp
             self.opened_timestamp = order.timestamp if not self.opened_timestamp else self.opened_timestamp
             # since the position is added, we need to calculate the cost basis
@@ -84,6 +91,7 @@ class Position(BaseModel):
             self.average_entry_price = self.cost_basis / (self.size + order.qty)
 
         if effect == PositionEffect.REDUCE:
+            print('reduce')
             # if the position is closed, set the closed timestamp
             self.closed_timestamp = order.timestamp
             # since the position is reduced, we need to calculate the realized pnl

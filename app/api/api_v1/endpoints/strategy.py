@@ -8,7 +8,6 @@ from starlette.responses import Response
 from components import Strategy
 from components.backtest.backtest import BacktestResult
 from components.ohlc import DataAdapter
-from components.ohlc.symbol import Symbol
 
 router = APIRouter()
 
@@ -58,3 +57,13 @@ async def run_strategy(request: RunStrategyRequest):
 
     backtest_result, plots = strategy.run(data=ohlc, parameters=parameters, plots=True)
     return RunStrategyResponse(backtest=backtest_result, plots=[p.as_dict() for p in plots])
+
+class SignalsRequest(BaseModel):
+    signal_type: str
+    strategy: RunStrategyRequest
+
+@router.post("/signals")
+async def run_signals(request: SignalsRequest):
+    """Run signals"""
+    print(request.signal_type)
+    pass

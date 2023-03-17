@@ -52,13 +52,6 @@ class Backtest:
 
 
         # use concurrent futures to test orders in parallel
-
-        # original code
-        # for p in positions:
-        #     p.test(ohlc=self.data)
-        #     print(str(p))
-
-        # new code
         logger.debug(f'Testing {len(positions)} positions in parallel...')
         with concurrent.futures.ThreadPoolExecutor() as executor:
             for p in positions:
@@ -73,13 +66,13 @@ class Backtest:
         # calculate win/loss ratio
         losing_trades = len([p for p in positions if p.pnl < 0])
         winning_trades = len([p for p in positions if p.pnl > 0])
-        wl_ratio = round(winning_trades / losing_trades, 2) if losing_trades > 0 else 0 if winning_trades == 0 else 1
+        wl_ratio = round(winning_trades / losing_trades, 2)
 
         # create backtest result
         self.result = BacktestResult(
             pnl=sum([position.pnl for position in positions]),
             wl_ratio=wl_ratio,
-            trades=0,
+            trades=len(positions),
             winning_trades=winning_trades,
             losing_trades=losing_trades,
             positions=positions,

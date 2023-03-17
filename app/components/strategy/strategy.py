@@ -176,7 +176,8 @@ class BaseStrategy:
         b = Backtest(strategy=self, data=data)
 
         # runs the backtest
-        b.test()
+        if self.positions.positions or self.orders.orders:
+            b.test()
 
         # run after methods
         for method in self._after_methods:
