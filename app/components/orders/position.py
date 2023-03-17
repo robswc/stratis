@@ -26,6 +26,7 @@ class Position(BaseModel):
     average_entry_price: Optional[float] = None
     average_exit_price: Optional[float] = None
     size: Optional[int] = 0
+    largest_size: Optional[int] = 0
     side: Optional[str] = None
     unrealized_pnl: Optional[float] = None
     pnl: Optional[float] = 0
@@ -87,6 +88,7 @@ class Position(BaseModel):
 
         # adjust the size, if the size is 0, the position is closed
         self.size += order.qty
+        self.largest_size = self.size if abs(self.size) > abs(self.largest_size) else self.largest_size
         self.closed = self.size == 0
 
 
