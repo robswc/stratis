@@ -19,8 +19,8 @@ RUN npm run build
 # Expose port 3000
 EXPOSE 3000
 
-ARG BACKEND_URL
-ARG BACKEND_PORT
+ARG NEXT_PUBLIC_BACKEND_URL
+ARG NEXT_PUBLIC_BACKEND_PORT
 
 # Run NextJS app
 CMD ["npm", "run", "start"]
