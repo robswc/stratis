@@ -14,8 +14,8 @@ services:
       context: ./ui
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_BACKEND_URL: http://app
-        NEXT_PUBLIC_BACKEND_PORT: 8000
+        - NEXT_PUBLIC_BACKEND_URL=http://app
+        - NEXT_PUBLIC_BACKEND_PORT=8000
     environment:
       - NEXT_PUBLIC_BACKEND_URL=http://app
       - NEXT_PUBLIC_BACKEND_PORT=8000
