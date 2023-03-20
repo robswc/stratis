@@ -22,7 +22,8 @@ class TestBacktest:
 
         # add positions
         STRATEGY.positions.open(order_type='market', side='buy', quantity=QTY)
-        entry_price, opened_timestamp = STRATEGY.data.close, STRATEGY.data.timestamp
+        entry_price, opened_timestamp = STRATEGY.data.close, (STRATEGY.data.timestamp + 300000)  # add 5 minutes
+        # timestamp
         STRATEGY.data.advance_index(100)
         STRATEGY.positions.close()
         exit_price, closed_timestamp = STRATEGY.data.close, STRATEGY.data.timestamp

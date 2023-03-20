@@ -82,16 +82,12 @@ class Position(BaseModel):
         effect = self._get_effect(order)
 
         if effect == PositionEffect.ADD:
-            print('add')
-            # if the position is opened, set the opened timestamp
-            self.opened_timestamp = order.timestamp if not self.opened_timestamp else self.opened_timestamp
             # since the position is added, we need to calculate the cost basis
             self.cost_basis += order.filled_avg_price * order.qty
             # adjust the average entry price
             self.average_entry_price = self.cost_basis / (self.size + order.qty)
 
         if effect == PositionEffect.REDUCE:
-            print('reduce')
             # if the position is closed, set the closed timestamp
             self.closed_timestamp = order.timestamp
             # since the position is reduced, we need to calculate the realized pnl
@@ -103,6 +99,7 @@ class Position(BaseModel):
         # adjust the size, if the size is 0, the position is closed
         self.size += order.qty
         self.largest_size = self.size if abs(self.size) > abs(self.largest_size) else self.largest_size
+        self.opened_timestamp = order.timestamp if self.opened_timestamp is None else self.opened_timestamp
         self.closed = self.size == 0
 
 
