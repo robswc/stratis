@@ -23,6 +23,7 @@ def get_effect(position: Position, order: Order):
     else:
         return 'increase'
 
+
 class BacktestResult(BaseModel):
     pnl: float
     wl_ratio: float
@@ -35,11 +36,15 @@ class BacktestResult(BaseModel):
     positions: List[Position]
     orders: List[Order]
 
+
 class Backtest:
     def __init__(self, data, strategy):
         self.data = data
         self.strategy = strategy
         self.result = None
+
+    def _get_orders_with_filled_timestamp(self, orders):
+        return [o for o in orders if o.filled_timestamp is not None]
 
     def _sort_orders(self, orders: List[Order]):
         return sorted(orders, key=lambda x: x.timestamp)
@@ -50,14 +55,12 @@ class Backtest:
         positions = self.strategy.positions.all()
         orders = self.strategy.orders.all()
 
-
         # use concurrent futures to test orders in parallel
         logger.debug(f'Testing {len(positions)} positions in parallel...')
         with concurrent.futures.ThreadPoolExecutor() as executor:
             for p in positions:
                 executor.submit(p.test, self.data)
         logger.debug(f'Finished testing {len(positions)} positions in parallel.')
-
 
         all_position_orders = []
         for p in positions:
@@ -73,6 +76,11 @@ class Backtest:
         else:
             wl_ratio = round(winning_trades / losing_trades, 2)
 
+        # filter and sort orders
+        result_orders = self._get_orders_with_filled_timestamp(orders + all_position_orders)
+        # sort ascending by timestamp
+        result_orders = self._sort_orders(result_orders)
+
         # create backtest result
         self.result = BacktestResult(
             pnl=sum([position.pnl for position in positions]),
@@ -81,5 +89,5 @@ class Backtest:
             winning_trades=winning_trades,
             losing_trades=losing_trades,
             positions=positions,
-            orders=orders + all_position_orders,
+            orders=result_orders,
         )

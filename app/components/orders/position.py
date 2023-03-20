@@ -168,6 +168,10 @@ class Position(BaseModel):
         self.opened_timestamp = order.timestamp if self.opened_timestamp is None else self.opened_timestamp
         self.closed = self.size == 0
 
+        # if order is missing filled timestamp, set it to the order timestamp
+        if order.filled_timestamp is None:
+            order.filled_timestamp = order.timestamp
+
 
 class BracketPosition(Position):
     pass

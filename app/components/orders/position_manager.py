@@ -9,6 +9,11 @@ class PositionManager:
         self._strategy = strategy
         self.positions: List[Position] = []
 
+    def add(self, position: Position):
+        """Adds a position to the manager"""
+        # TODO: add validation
+        self.positions.append(position)
+
     def open(self, order_type: str, side: str, quantity: int):
         """Opens a new position"""
 

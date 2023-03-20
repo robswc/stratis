@@ -34,16 +34,16 @@ class SMACrossOverAdvanced(Strategy):
                 side='sell',
                 qty=100,
                 symbol=self.symbol.symbol,
-                limit_price=self.data.close + 5,
+                limit_price=self.data.close + 1,
             )
             stop_loss = StopOrder(
                 side='sell',
                 qty=100,
                 symbol=self.symbol.symbol,
-                stop_price=self.data.close - 5,
+                stop_price=self.data.close - 1,
             )
             p = Position(orders=[open_order, take_profit, stop_loss])
-            self.positions.append(p)
+            self.positions.add(p)
 
     @after
     def create_plots(self):
