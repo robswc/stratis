@@ -36,7 +36,6 @@ class Position(BaseModel):
 
     def _get_effect(self, order: Order):
         """Get the effect of an order on a position."""
-        print(self.size, self.size + order.qty)
         if abs(self.size) < abs(self.size + order.qty):
             return PositionEffect.ADD
         else:
