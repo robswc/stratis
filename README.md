@@ -14,9 +14,13 @@ of tradingview's [Pinescript](https://www.tradingview.com/pine-script-docs/en/v5
 stratis is in the early stages of development, and is not yet ready for production use.  However, it is encouraged
 to try it out and provide feedback via [GitHub issues](https://github.com/robswc/stratis/issues/new).
 
-Stratis is a part of [Shenandoah Research's](https://shenandoah.capital/) Open source Trading Software Initiative.
+Stratis is a part of [Shenandoah Research's](https://shenandoah.capital/) Open source Trading Software Initiative and developed by Polyad Decision Sciences software engineers!
 
-<img width="256" alt="stratis-full-logo" src="https://user-images.githubusercontent.com/38849824/224753683-4cb3decb-4232-42e4-8bce-fca2f7f23998.png">
+<span>
+<img width="64" alt="sr-logo" src="https://shenandoah.capital/static/media/box_logo_light_v1.7e7ad0f21c75ea8620f0.png">
+<a href="https://polyad.ai/"><img width="256" alt="poly-ad-logo" src="https://user-images.githubusercontent.com/38849824/226416451-1e511803-6e0e-4559-9247-c1c4f8bec720.png"></a>
+</span>
+
 
 ## Basic Example
 
