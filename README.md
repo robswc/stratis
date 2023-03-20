@@ -2,14 +2,25 @@
 
 # Stratis
 
+[![License](https://img.shields.io/github/license/robswc/stratis?style=for-the-badge)](https://github.com/robswc/stratis/blob/master/LICENSE)
+[![Build](https://img.shields.io/github/actions/workflow/status/robswc/stratis/pytest.yml?style=for-the-badge)]()
+[![GitHub repo size](https://img.shields.io/github/repo-size/robswc/stratis?style=for-the-badge)](https://github.com/robswc/stratis)
+[![Stars](https://img.shields.io/github/stars/robswc/stratis?style=for-the-badge)](https://github.com/robswc/stratis/stargazers)
+[![Twitter Follow](https://img.shields.io/twitter/follow/robswc?label=Twitter!&style=for-the-badge)](https://twitter.com/robswc)
+
+
 Stratis is a python-based framework for developing and testing strategies, inspired by the simplicity 
 of tradingview's [Pinescript](https://www.tradingview.com/pine-script-docs/en/v5/Introduction.html).  Currently,
 stratis is in the early stages of development, and is not yet ready for production use.  However, it is encouraged
 to try it out and provide feedback via [GitHub issues](https://github.com/robswc/stratis/issues/new).
 
-Stratis is a part of [Shenandoah Research's](https://shenandoah.capital/) Open source Trading Software Initiative.
+Stratis is a part of [Shenandoah Research's](https://shenandoah.capital/) Open source Trading Software Initiative and developed by Polyad Decision Sciences software engineers!
 
-<img width="256" alt="stratis-full-logo" src="https://user-images.githubusercontent.com/38849824/224753683-4cb3decb-4232-42e4-8bce-fca2f7f23998.png">
+<span>
+<img width="64" alt="sr-logo" src="https://shenandoah.capital/static/media/box_logo_light_v1.7e7ad0f21c75ea8620f0.png">
+<a href="https://polyad.ai/"><img width="256" alt="poly-ad-logo" src="https://user-images.githubusercontent.com/38849824/226416451-1e511803-6e0e-4559-9247-c1c4f8bec720.png"></a>
+</span>
+
 
 ## Basic Example
 
