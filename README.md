@@ -3,7 +3,7 @@
 # Stratis
 
 [![License](https://img.shields.io/github/license/robswc/stratis?style=for-the-badge)](https://github.com/robswc/stratis/blob/master/LICENSE)
-[![Version](https://img.shields.io/github/v/release/robswc/stratis?style=for-the-badge)](https://github.com/robswc/stratis/releases)
+[![Build](https://img.shields.io/github/actions/workflow/status/robswc/stratis/pytest.yml?style=for-the-badge)]()
 [![GitHub repo size](https://img.shields.io/github/repo-size/robswc/stratis?style=for-the-badge)](https://github.com/robswc/stratis)
 [![Stars](https://img.shields.io/github/stars/robswc/stratis?style=for-the-badge)](https://github.com/robswc/stratis/stargazers)
 [![Twitter Follow](https://img.shields.io/twitter/follow/robswc?label=Twitter!&style=for-the-badge)](https://twitter.com/robswc)
