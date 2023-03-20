@@ -4,8 +4,10 @@ import pytest
 from pydantic import ValidationError
 
 from components.orders.order import Order, OrderSide as Side, OrderType
+from components.orders.position import Position
 
 TIMESTAMP = int(datetime.now().timestamp())
+DETERMINISTIC_TIMESTAMP = 1610000000
 
 
 class TestOrders:
@@ -57,10 +59,6 @@ class TestOrders:
             {"side": Side.BUY, "type": OrderType.MARKET, "timestamp": TIMESTAMP, "qty": 1},
             # missing side
             {"symbol": "BTCUSDT", "type": OrderType.MARKET, "timestamp": TIMESTAMP, "qty": 1},
-            # missing type
-            {"symbol": "BTCUSDT", "side": Side.BUY, "timestamp": TIMESTAMP, "qty": 1},
-            # missing timestamp
-            {"symbol": "BTCUSDT", "side": Side.BUY, "type": OrderType.MARKET, "qty": 1},
             # missing qty
             {"symbol": "BTCUSDT", "side": Side.BUY, "type": OrderType.MARKET, "timestamp": TIMESTAMP},
         ]
@@ -70,3 +68,21 @@ class TestOrders:
                 Order(**data)
 
 
+class TestPosition:
+    def test_position(self):
+        fake_order_1 = Order(
+            symbol='BTCUSDT',
+            side=Side.BUY,
+            type=OrderType.MARKET,
+            qty=1,
+            timestamp=DETERMINISTIC_TIMESTAMP,
+        )
+        fake_order_2 = Order(
+            symbol='BTCUSDT',
+            side=Side.SELL,
+            type=OrderType.MARKET,
+            qty=1,
+            timestamp=DETERMINISTIC_TIMESTAMP + 30000,
+        )
+        p = Position(orders=[fake_order_1, fake_order_2])
+        assert p._get_id() == "0dbf110bd4db94de539295c65867705d"

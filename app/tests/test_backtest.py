@@ -1,13 +1,14 @@
 from components.backtest.backtest import Backtest
 from components.ohlc import CSVAdapter
+from components.orders.position import Position
 from storage.strategies.examples.sma_cross_over import SMACrossOver
 
 OHLC = CSVAdapter().get_data('tests/data/AAPL.csv', 'AAPL')
 STRATEGY = SMACrossOver(data=OHLC)
 
+
 class TestBacktest:
     def test_backtest_orders(self):
-
         # add orders
         STRATEGY.orders.market_order(side='buy', quantity=1)
 
@@ -17,7 +18,6 @@ class TestBacktest:
         assert backtest.result is not None
 
     def test_backtest_positions(self):
-
         QTY = 1
 
         # add positions
@@ -46,6 +46,21 @@ class TestBacktest:
         assert p.average_exit_price == exit_price
         assert p.opened_timestamp == opened_timestamp
         assert p.closed_timestamp == closed_timestamp
-
-
         assert backtest.result is not None
+
+    def test_bracket_position(self):
+        STRATEGY.data.reset_index()
+        STRATEGY.data.advance_index(100)
+        root_order = STRATEGY.orders.market_order(side='buy', quantity=1)
+        take_profit_order = STRATEGY.orders.limit_order(side='sell', quantity=1, price=root_order.price + 2)
+        stop_loss_order = STRATEGY.orders.stop_loss_order(side='sell', quantity=1, price=root_order.price - 5)
+
+        # create position
+        p = Position(orders=STRATEGY.orders.all())
+        p.test(ohlc=OHLC)
+
+        # check position
+        assert p.size == 0
+        assert p.pnl == -4.80000000000004
+
+

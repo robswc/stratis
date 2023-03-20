@@ -1,4 +1,4 @@
-from components.orders.order import Order
+from components.orders.order import Order, StopOrder, LimitOrder
 
 
 class OrderManager:
@@ -18,6 +18,30 @@ class OrderManager:
             symbol=self.symbol.symbol,
             filled_avg_price=self.strategy.data.close,
             timestamp=self.strategy.data.timestamp,
+        )
+        self.orders.append(order)
+        return order
+
+    def stop_loss_order(self, side: str, quantity: int, price: float):
+        order = StopOrder(
+            type='stop',
+            side=side,
+            qty=quantity,
+            symbol=self.symbol.symbol,
+            stop_price=price,
+            timestamp=None,
+        )
+        self.orders.append(order)
+        return order
+
+    def limit_order(self, side: str, quantity: int, price: float):
+        order = LimitOrder(
+            type='limit',
+            side=side,
+            qty=quantity,
+            symbol=self.symbol.symbol,
+            limit_price=price,
+            timestamp=None,
         )
         self.orders.append(order)
         return order

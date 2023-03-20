@@ -1,9 +1,11 @@
+import hashlib
 from typing import Optional
 
 from pydantic import BaseModel
 
 
 class Signal(BaseModel):
+    id: Optional[str] = None
     order_type: Optional[str] = None
     side: Optional[str] = None
     quantity: Optional[int] = None
@@ -14,8 +16,12 @@ class Signal(BaseModel):
         self.order_type = position.orders[0].type
         self.side = 'sell' if position.side == 'sell' else 'buy'
         self.quantity = position.orders[0].qty
-        self.price = position.average_entry_price
+        self.price = position.orders[0].filled_avg_price
+        self.id = self.get_id()
         return self
+
+    def get_id(self):
+        return hashlib.md5(str(self).encode()).hexdigest()
 
 
 
