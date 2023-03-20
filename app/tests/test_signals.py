@@ -1,4 +1,4 @@
-from components.orders.order import Order
+from components.orders.order import Order, StopOrder, LimitOrder
 from components.orders.position import Position
 from components.orders.signals import Signal, BracketSignal
 
@@ -29,29 +29,25 @@ class TestSignals:
 
     def test_bracket_signal(self):
 
-        stop_order = Order(
+        stop_order = StopOrder(
             type='stop',
             side='sell',
-            qty=-100,
+            qty=100,
             symbol='AAPL',
-            filled_avg_price=90,
-            timestamp=1100,
+            stop_price=90,
         )
-        limit_order = Order(
+        limit_order = LimitOrder(
             type='limit',
             side='sell',
-            qty=-100,
+            qty=100,
             symbol='AAPL',
-            filled_avg_price=110,
-            timestamp=1100,
+            limit_price=110,
         )
 
 
         p = Position(
             orders=[ROOT_ORDER, stop_order, limit_order],
         )
-
-        p.test()
 
         s = BracketSignal().from_position(p)
 

@@ -51,9 +51,10 @@ class TestBacktest:
     def test_bracket_position(self):
         STRATEGY.data.reset_index()
         STRATEGY.data.advance_index(100)
+        STRATEGY.orders.orders = []
         root_order = STRATEGY.orders.market_order(side='buy', quantity=1)
-        take_profit_order = STRATEGY.orders.limit_order(side='sell', quantity=1, price=root_order.price + 2)
-        stop_loss_order = STRATEGY.orders.stop_loss_order(side='sell', quantity=1, price=root_order.price - 5)
+        STRATEGY.orders.limit_order(side='sell', quantity=1, price=root_order.price + 2)
+        STRATEGY.orders.stop_loss_order(side='sell', quantity=1, price=root_order.price - 10)
 
         # create position
         p = Position(orders=STRATEGY.orders.all())
@@ -61,6 +62,25 @@ class TestBacktest:
 
         # check position
         assert p.size == 0
-        assert p.pnl == -4.80000000000004
+        assert p.pnl == 1.9999999999999716
 
+
+    def test_stop_loss(self):
+        strategy = SMACrossOver(data=OHLC)
+        strategy.orders.orders = []
+        strategy.data.reset_index()
+        strategy.data.advance_index(100)
+
+        # add orders
+        root_order = strategy.orders.market_order(side='buy', quantity=1)
+        strategy.orders.stop_loss_order(side='sell', quantity=1, price=root_order.price - 5)
+        strategy.orders.limit_order(side='sell', quantity=1, price=root_order.price + 100)
+
+        # create position
+        p = Position(orders=strategy.orders.all())
+        p.test(ohlc=OHLC)
+
+        # check position
+        assert p.size == 0
+        assert p.pnl == -5
 

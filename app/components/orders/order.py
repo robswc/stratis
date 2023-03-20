@@ -108,11 +108,13 @@ class Order(BaseModel):
             super().__init__(**data)
         except ValidationError as e:
             logger.error(e)
+            # logger.exception(e)
             raise e
 
         # if valid, set id
         self.id = self.get_id()
         self.type = self.type or OrderType.MARKET
+        self.filled_timestamp = self.timestamp
 
         # if side is sell, qty must be negative
         if self.side == OrderSide.SELL:
@@ -126,6 +128,10 @@ class Order(BaseModel):
 
 class LimitOrder(Order):
     limit_price: float
+
+    @property
+    def price(self):
+        return self.limit_price
 
     class Config:
         schema_extra = {
@@ -150,7 +156,11 @@ class LimitOrder(Order):
 
 
 class StopOrder(Order):
-    stop_price: float
+    stop_price: Optional[float]
+
+    @property
+    def price(self):
+        return self.stop_price
 
     class Config:
         schema_extra = {

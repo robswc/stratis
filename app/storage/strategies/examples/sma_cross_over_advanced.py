@@ -1,3 +1,5 @@
+import datetime
+
 from components import Parameter
 from components import Strategy, on_step
 from components.orders.order import Order, LimitOrder, StopOrder
@@ -21,6 +23,8 @@ class SMACrossOverAdvanced(Strategy):
     def check_for_crossover(self):
         # add logic to crossover here
         cross_over = ta.logic.crossover(self.sma_fast, self.sma_slow)
+        # filled timestamp must be set to "Now" + 5 minutes as the order is technically filled at the next candle
+        filled_timestamp = datetime.datetime.fromtimestamp(self.data.timestamp / 1000) + datetime.timedelta(minutes=5)
         if cross_over:
             open_order = Order(
                 type='market',
@@ -28,7 +32,8 @@ class SMACrossOverAdvanced(Strategy):
                 qty=100,
                 symbol=self.symbol.symbol,
                 filled_avg_price=self.data.close,
-                timestamp=self.data.timestamp,
+                timestamp=filled_timestamp.timestamp() * 1000,
+                filled_timestamp=filled_timestamp.timestamp() * 1000,
             )
             take_profit = LimitOrder(
                 side='sell',

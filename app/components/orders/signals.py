@@ -32,6 +32,6 @@ class BracketSignal(Signal):
     def from_position(self, position: 'Position'):
         super().from_position(position)
         # TODO: add validation for these
-        self.stop_loss = [o for o in position.orders if o.type == 'stop'][0].price
-        self.take_profit = [o for o in position.orders if o.type == 'limit'][0].price
+        self.stop_loss = [o for o in position.orders if o.type == 'stop'][0].stop_price
+        self.take_profit = [o for o in position.orders if o.type == 'limit'][0].limit_price
         return self

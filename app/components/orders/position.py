@@ -65,14 +65,6 @@ class Position(BaseModel):
         """Get the root side orders of the position."""
         return [o for o in self.orders if o.side == self.side]
 
-    def test(self, ohlc: 'OHLC' = None):
-        # iterate over all orders, handling each one
-        for o in self.orders:
-            try:
-                self.handle_order(order=o, ohlc=ohlc)
-            except PositionClosedException:
-                logger.warning(f'Position {self.id} is already closed')
-
     def add_closing_order(self, ohlc: 'OHLC'):
         """Adds a calculated closing order to the position."""
         if self.closed:
@@ -90,8 +82,8 @@ class Position(BaseModel):
 
         self.orders.append(order)
 
-    def _handle_tbd_order(self, order: Union[Order, StopOrder, LimitOrder], ohlc: 'OHLC' = None):
-        # get the start index of the OHLC data, which is the index of the first order
+    def _fill_working_order(self, order: Union[Order, StopOrder, LimitOrder], ohlc: 'OHLC' = None):
+        """Handles TBD orders.  Sets the timestamp and fills the order if it was filled."""
         start_index = ohlc.index.get_loc(self.orders[0].timestamp)
         df = ohlc.dataframe.iloc[start_index:]
         # loop through the df
@@ -119,6 +111,7 @@ class Position(BaseModel):
 
         # if the order is still missing a timestamp, it was never filled
         if order.filled_timestamp is None:
+            logger.warning(f'Order {order.id} was never filled')
             return
         else:
             order.timestamp = order.filled_timestamp
@@ -130,8 +123,8 @@ class Position(BaseModel):
             raise PositionClosedException('Position is already closed')
 
         # handle TBD order
-        if order.timestamp is None:
-            self._handle_tbd_order(order, ohlc)
+        if order.filled_timestamp is None:
+            return
 
         # if the position is missing a side, set it to the side of the first order
         if self.side is None:
@@ -171,6 +164,34 @@ class Position(BaseModel):
         # if order is missing filled timestamp, set it to the order timestamp
         if order.filled_timestamp is None:
             order.filled_timestamp = order.timestamp
+
+    def test(self, ohlc: 'OHLC' = None):
+        """Backtest the position."""
+        # handle all orders with a filled timestamp, as these are already filled
+        filled_orders = [o for o in self.orders if o.filled_timestamp is not None]
+        for order in filled_orders:
+            self.handle_order(order=order, ohlc=ohlc)
+
+        # if there are still working orders, handle them
+        working_orders = [o for o in self.orders if o.filled_timestamp is None]
+        if len(working_orders) > 0:
+
+            # handle all orders without a filled timestamp, as these are TBD
+            for order in working_orders:
+                self._fill_working_order(order=order, ohlc=ohlc)
+
+            # determine which order was filled first, filter out any orders that were never filled
+            filled_working_orders = [o for o in working_orders if o.filled_timestamp is not None]
+            sorted_orders = sorted(filled_working_orders, key=lambda o: o.timestamp)
+
+            # handle the first order
+            first_order = sorted_orders[0]
+            self.handle_order(order=first_order, ohlc=ohlc)
+
+            # set the remaining order's filled_timestamp to None
+            for order in sorted_orders[1:]:
+                order.filled_timestamp = None
+
 
 
 class BracketPosition(Position):
