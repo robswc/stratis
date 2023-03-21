@@ -11,12 +11,6 @@ from components.ohlc import DataAdapter
 
 router = APIRouter()
 
-class RunStrategyRequest(BaseModel):
-    strategy: str
-    parameters: List[dict]
-    adapter: str
-    data: str
-
 @router.get("/strategy")
 async def list_all_strategies():
     """List all strategies"""
@@ -36,6 +30,12 @@ class RunStrategyResponse(BaseModel):
     backtest: BacktestResult
     plots: List[dict]
 
+class RunStrategyRequest(BaseModel):
+    strategy: str
+    parameters: dict
+    adapter: str
+    data: str
+
 @router.post("/", response_model=RunStrategyResponse)
 async def run_strategy(request: RunStrategyRequest):
     """Run a strategy with data"""
@@ -44,7 +44,7 @@ async def run_strategy(request: RunStrategyRequest):
     name = request.strategy
     data_adapter_name = request.adapter
     data = str(request.data)
-    parameters = {p['name']: p['value'] for p in request.parameters} if request.parameters else {}
+    parameters = request.parameters if request.parameters else {}
 
     # get strategy and data adapter
     da = DataAdapter.objects.get(name=data_adapter_name)

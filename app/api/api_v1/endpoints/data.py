@@ -23,3 +23,8 @@ async def get_data(adapter: str, data: str, bars: Optional[int] = None):
     if bars is not None:
         data = data[-bars:]
     return data
+
+@router.get("/adapters", tags=["adapter"])
+async def get_adapters():
+    """List all data adapters"""
+    return [a.name for a in DataAdapter.objects.all()]

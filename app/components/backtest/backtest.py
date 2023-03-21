@@ -74,7 +74,7 @@ class Backtest:
         elif winning_trades == 0:
             wl_ratio = 0
         else:
-            wl_ratio = round(winning_trades / losing_trades, 2)
+            wl_ratio = round(winning_trades / (winning_trades + losing_trades), 2)
 
         # filter and sort orders
         result_orders = self._get_orders_with_filled_timestamp(orders + all_position_orders)
