@@ -1,7 +1,7 @@
 from components.backtest.backtest import Backtest
 from components.ohlc import CSVAdapter
-from components.orders.order import Order
-from components.positions.position import Position
+from components.orders import Order
+from components.positions import Position
 from storage.strategies.examples.sma_cross_over import SMACrossOver
 
 OHLC = CSVAdapter().get_data('tests/data/AAPL.csv', 'AAPL')
@@ -143,10 +143,18 @@ class TestBacktest:
             ]
         )
 
+        p3 = Position(
+            orders=[
+                Order(side='buy', symbol='AAPL', qty=1, order_type='market', filled_avg_price=100, timestamp=1),
+                Order(side='sell', symbol='AAPL', qty=1, order_type='stop', filled_avg_price=110, timestamp=2),
+            ]
+        )
+
         b.strategy.positions.add(p1)
         b.strategy.positions.add(p2)
+        b.strategy.positions.add(p3)
         b.test()
 
-        assert b.result.pnl == 60
+        assert b.result.pnl == 70
 
 
