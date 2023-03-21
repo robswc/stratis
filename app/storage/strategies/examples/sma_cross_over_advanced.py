@@ -3,7 +3,7 @@ import datetime
 from components import Parameter
 from components import Strategy, on_step
 from components.orders.order import Order, LimitOrder, StopOrder
-from components.orders.position import Position
+from components.positions.position import Position
 from components.strategy import ta
 from components.strategy.decorators import after
 from components.strategy.strategy import Plot

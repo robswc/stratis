@@ -5,7 +5,7 @@ from loguru import logger
 from pydantic import BaseModel
 
 from components.orders.order import Order
-from components.orders.position import Position, PositionClosedException
+from components.positions.position import Position
 
 
 def get_effect(position: Position, order: Order):

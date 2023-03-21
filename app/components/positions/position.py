@@ -1,26 +1,12 @@
 import hashlib
-import random
 from typing import Optional, List, Union
 
 from loguru import logger
 from pydantic import BaseModel
 
 from components.orders.order import Order, StopOrder, LimitOrder
-
-
-class PositionValidationException(Exception):
-    pass
-
-class PositionUnbalancedException(Exception):
-    pass
-
-class PositionClosedException(Exception):
-    pass
-
-
-class PositionEffect:
-    REDUCE = 'reduce'
-    ADD = 'add'
+from components.positions.enums import PositionEffect
+from components.positions.exceptions import PositionUnbalancedException, PositionClosedException
 
 
 class Position(BaseModel):
@@ -57,32 +43,44 @@ class Position(BaseModel):
         else:
             return PositionEffect.REDUCE
 
-    def _get_size(self):
-        """Get the size of all orders in the position."""
-        return sum([o.qty for o in self.orders])
-
     def _get_root_side_orders(self):
         """Get the root side orders of the position."""
         return [o for o in self.orders if o.side == self.side]
 
-    def add_closing_order(self, ohlc: 'OHLC'):
-        """Adds a calculated closing order to the position."""
-        if self.closed:
-            raise PositionClosedException('Position is already closed')
+    def get_size(self):
+        """Get the size of all orders in the position."""
+        return sum([o.qty for o in self.orders])
 
-        # create the closing order
-        order = Order(
-            type='market',
-            side='buy' if self.side == 'sell' else 'sell',
-            qty=self._get_size() * -1,
-            symbol=self.orders[0].symbol,
-            filled_avg_price=ohlc.close,
-            timestamp=ohlc.timestamp,
-        )
+    def get_side(self):
+        """Returns the side of the position, either buy or sell."""
+        if self.side is None:
+            return self.orders[0].side
+        return self.side
 
-        self.orders.append(order)
+    def _update_average_entry(self, order: Order):
+        if self.average_exit_price:
+            self.average_exit_price = ((self.average_exit_price + order.filled_avg_price) / 2)
+        else:
+            self.average_exit_price = order.filled_avg_price
 
-    def _fill_working_order(self, order: Union[Order, StopOrder, LimitOrder], ohlc: 'OHLC' = None):
+    def _update_pnl(self, order: Order):
+        difference = order.filled_avg_price - self.average_entry_price
+        multiplier = -1 if self.get_side() == 'sell' else 1
+        realized_pnl = (difference * abs(order.qty)) * multiplier
+        self.pnl += realized_pnl
+
+    def _update_largest_size(self):
+        if abs(self.size) > self.largest_size:
+            self.largest_size = abs(self.size)
+
+    def _update_opened_timestamp(self, order: Order):
+        if self.opened_timestamp is None:
+            self.opened_timestamp = order.timestamp
+
+    def _add_order_to_size(self, order: Order):
+        self.size += order.qty
+
+    def _fill_order(self, order: Union[Order, StopOrder, LimitOrder], ohlc: 'OHLC' = None):
         """Handles TBD orders.  Sets the timestamp and fills the order if it was filled."""
         start_index = ohlc.index.get_loc(self.orders[0].timestamp)
         df = ohlc.dataframe.iloc[start_index:]
@@ -118,13 +116,13 @@ class Position(BaseModel):
 
     def handle_order(self, order: Union[Order, StopOrder, LimitOrder], ohlc: 'OHLC' = None):
 
+        # if order isn't already filled, it cannot be handled yet
+        if order.filled_timestamp is None:
+            return
+
         # if the position is closed, we can't handle any more orders
         if self.closed:
             raise PositionClosedException('Position is already closed')
-
-        # handle TBD order
-        if order.filled_timestamp is None:
-            return
 
         # if the position is missing a side, set it to the side of the first order
         if self.side is None:
@@ -146,20 +144,19 @@ class Position(BaseModel):
             if self.side == 'sell' and self.size + order.qty > 0:
                 raise PositionUnbalancedException('Position will change sides')
 
-
-            # if the position is closed, set the closed timestamp
-            self.closed_timestamp = order.timestamp
-            # since the position is reduced, we need to calculate the realized pnl
-            realized_pnl = (order.filled_avg_price - self.average_entry_price) * (order.qty * -1 if self.size > 0 else order.qty)
-            # adjust the average exit price
-            self.average_exit_price = ((self.average_exit_price + order.filled_avg_price) / 2) if self.average_exit_price else order.filled_avg_price
-            self.pnl += realized_pnl
+            # since the position is reduced, we need to re-calculate the average entry price and update the PNL
+            self._update_average_entry(order)
+            self._update_pnl(order)
 
         # adjust the size, if the size is 0, the position is closed
-        self.size += order.qty
-        self.largest_size = self.size if abs(self.size) > abs(self.largest_size) else self.largest_size
-        self.opened_timestamp = order.timestamp if self.opened_timestamp is None else self.opened_timestamp
+        self._add_order_to_size(order)
+        self._update_largest_size()
+        self._update_opened_timestamp(order)
+
+        # set closed, update closed timestamp if closed
         self.closed = self.size == 0
+        if self.closed:
+            self.closed_timestamp = order.timestamp
 
         # if order is missing filled timestamp, set it to the order timestamp
         if order.filled_timestamp is None:
@@ -178,7 +175,7 @@ class Position(BaseModel):
 
             # handle all orders without a filled timestamp, as these are TBD
             for order in working_orders:
-                self._fill_working_order(order=order, ohlc=ohlc)
+                self._fill_order(order=order, ohlc=ohlc)
 
             # determine which order was filled first, filter out any orders that were never filled
             filled_working_orders = [o for o in working_orders if o.filled_timestamp is not None]
@@ -193,6 +190,8 @@ class Position(BaseModel):
                 order.filled_timestamp = None
 
 
-
 class BracketPosition(Position):
-    pass
+    def __init__(self):
+        super().__init__()
+        self.stop_order: Union[StopOrder, None] = None
+        self.limit_order: Union[LimitOrder, None] = None

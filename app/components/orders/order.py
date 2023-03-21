@@ -1,10 +1,11 @@
 import datetime
 import hashlib
-from enum import Enum
 from typing import Optional, Union
 
 from loguru import logger
 from pydantic import BaseModel, ValidationError, validator
+
+from components.orders.enums import TimeInForce, OrderType, OrderSide
 
 """
 Similar to Alpaca-py
@@ -13,37 +14,6 @@ Similar to Alpaca-py
 
 class OrderValidationError(Exception):
     pass
-
-
-def abbr_type(order_type):
-    if order_type == OrderType.MARKET:
-        return "mkt"
-    elif order_type == OrderType.LIMIT:
-        return "lmt"
-    elif order_type == OrderType.STOP:
-        return "stp"
-
-
-class TimeInForce(str, Enum):
-    DAY = "day"
-    GTC = "gtc"
-    OPG = "opg"
-    CLS = "cls"
-    IOC = "ioc"
-    FOK = "fok"
-
-
-class OrderType(str, Enum):
-    MARKET = "market"
-    LIMIT = "limit"
-    STOP = "stop"
-    STOP_LIMIT = "stop_limit"
-    TRAILING_STOP = "trailing_stop"
-
-
-class OrderSide(str, Enum):
-    BUY = "buy"
-    SELL = "sell"
 
 
 class Order(BaseModel):
@@ -76,9 +46,10 @@ class Order(BaseModel):
             return 'TBD'
 
     def __str__(self):
-        order_type = abbr_type(self.type).upper()
+        order_type = OrderType.abbreviation(self.type).upper()
         side = self.side.upper()
-        return f'{order_type} {side} [{self.qty}] {self.symbol} @ {self.filled_avg_price}\t({self._timestamp_to_datetime(self.timestamp)})'
+        return f'{order_type} {side} [{abs(self.qty)}] {self.symbol} @ {self.filled_avg_price}\t' \
+               f'({self._timestamp_to_datetime(self.timestamp)})'
 
     def __hash__(self):
         h = hashlib.sha256(f'{self.timestamp}{self.symbol}{self.qty}{self.side}{self.type}'.encode())
@@ -119,6 +90,8 @@ class Order(BaseModel):
         # if side is sell, qty must be negative
         if self.side == OrderSide.SELL:
             self.qty = -abs(self.qty)
+        else:
+            self.qty = abs(self.qty)
 
     @validator('qty')
     def qty_must_be_int(cls, v):
@@ -150,7 +123,7 @@ class LimitOrder(Order):
         self.type = OrderType.LIMIT
 
     def __str__(self):
-        order_type = abbr_type(self.type).upper()
+        order_type = OrderType.abbreviation(self.type).upper()
         side = self.side.upper()
         return f'{order_type} {side} [{self.qty}] {self.symbol} @ {self.limit_price}\t({self._timestamp_to_datetime(self.timestamp)})'
 
@@ -179,6 +152,6 @@ class StopOrder(Order):
         self.type = OrderType.STOP
 
     def __str__(self):
-        order_type = abbr_type(self.type).upper()
+        order_type = OrderType.abbreviation(self.type).upper()
         side = self.side.upper()
         return f'{order_type} {side} [{self.qty}] {self.symbol} @ {self.stop_price}\t({self._timestamp_to_datetime(self.timestamp)})'

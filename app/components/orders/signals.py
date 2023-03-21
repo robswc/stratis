@@ -14,7 +14,7 @@ class Signal(BaseModel):
 
     def from_position(self, position: 'Position'):
         self.order_type = position.orders[0].type
-        self.side = 'sell' if position.side == 'sell' else 'buy'
+        self.side = position.get_side()
         self.quantity = position.orders[0].qty
         self.price = position.orders[0].filled_avg_price
         self.id = self.get_id()

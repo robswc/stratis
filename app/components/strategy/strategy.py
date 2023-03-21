@@ -1,5 +1,3 @@
-import inspect
-import json
 import sys
 from typing import List, Union
 
@@ -11,7 +9,7 @@ from components.backtest.backtest import Backtest
 from components.manager.manager import ComponentManager
 from components.ohlc import OHLC
 from components.orders.order_manager import OrderManager
-from components.orders.position_manager import PositionManager
+from components.positions.position_manager import PositionManager
 from components.parameter import BaseParameter, Parameter, ParameterModel
 from components.strategy.decorators import extract_decorators
 

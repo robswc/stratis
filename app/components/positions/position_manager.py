@@ -1,7 +1,8 @@
 from typing import List
 
 from components.orders.order import Order
-from components.orders.position import Position
+from components.positions.position import Position
+from components.positions.utils import add_closing_order_to_position
 
 
 class PositionManager:
@@ -38,7 +39,8 @@ class PositionManager:
 
     def close(self):
         """Closes the most recent position"""
-        self.positions[-1].add_closing_order(ohlc=self._strategy.data)
+        position_to_close = self.positions[-1]
+        add_closing_order_to_position(position=position_to_close, ohlc=self._strategy.data)
 
     def all(self):
         return self.positions

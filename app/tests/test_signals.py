@@ -1,5 +1,5 @@
 from components.orders.order import Order, StopOrder, LimitOrder
-from components.orders.position import Position
+from components.positions.position import Position
 from components.orders.signals import Signal, BracketSignal
 
 ROOT_ORDER = Order(
@@ -58,6 +58,6 @@ class TestSignals:
         assert s.take_profit == 110
 
         # check that serializing to JSON works as expected
-        assert s.json() == '{"id": "94711630e6dc4260573f83360f02d139", "order_type": "market", "side": "buy", ' \
+        assert s.json() == '{"id": "f37e463a01354c4931ca56122ecca2ea", "order_type": "market", "side": "buy", ' \
                            '"quantity": 100, "price": 100.0, ' \
                            '"stop_loss": 90.0, "take_profit": 110.0}'

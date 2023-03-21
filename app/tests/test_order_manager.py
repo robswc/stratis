@@ -1,6 +1,7 @@
 from components.ohlc import OHLC, CSVAdapter
 from components.ohlc.symbol import Symbol
-from components.orders.order import Order, OrderType
+from components.orders.order import Order
+from components.orders.enums import OrderType
 from components.orders.order_manager import OrderManager
 from components.strategy.strategy import BaseStrategy
 from storage.strategies.examples.sma_cross_over import SMACrossOver
