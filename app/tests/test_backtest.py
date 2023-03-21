@@ -1,6 +1,7 @@
 from components.backtest.backtest import Backtest
 from components.ohlc import CSVAdapter
-from components.orders.position import Position
+from components.orders.order import Order
+from components.positions.position import Position
 from storage.strategies.examples.sma_cross_over import SMACrossOver
 
 OHLC = CSVAdapter().get_data('tests/data/AAPL.csv', 'AAPL')
@@ -83,4 +84,69 @@ class TestBacktest:
         # check position
         assert p.size == 0
         assert p.pnl == -5
+
+    def test_overview_long_orders(self):
+        strategy = SMACrossOver(data=OHLC)
+        strategy.orders.orders = []
+        strategy.data.reset_index()
+        strategy.data.advance_index(100)
+
+        # create positions
+        for i in range(3):
+            strategy.data.advance_index(5)
+            strategy.positions.open(order_type='market', side='buy', quantity=1)
+            strategy.data.advance_index(5)
+            strategy.positions.close()
+
+        # create backtest
+        backtest = Backtest(strategy=strategy, data=OHLC)
+        backtest.test()
+
+        # check overview
+        assert backtest.result.pnl == -5.170000000000016
+
+    def test_overview_short_orders(self):
+        # now do the same with short orders
+        strategy = SMACrossOver(data=OHLC)
+        strategy.orders.orders = []
+        strategy.data.reset_index()
+        strategy.data.advance_index(100)
+
+        # create positions
+        for i in range(3):
+            strategy.data.advance_index(5)
+            strategy.positions.open(order_type='market', side='sell', quantity=1)
+            strategy.data.advance_index(5)
+            strategy.positions.close()
+
+        # create backtest
+        backtest = Backtest(strategy=strategy, data=OHLC)
+        backtest.test()
+
+        # check overview
+        assert backtest.result.pnl == 5.170000000000016
+
+    def test_complex_positions(self):
+        b = Backtest(strategy=SMACrossOver(), data=OHLC)
+
+        p1 = Position(
+            orders=[
+                Order(side='buy', symbol='AAPL', qty=1, order_type='market', filled_avg_price=100, timestamp=1),
+                Order(side='sell', symbol='AAPL', qty=1, order_type='limit', filled_avg_price=150, timestamp=2),
+            ]
+        )
+
+        p2 = Position(
+            orders=[
+                Order(side='sell', symbol='AAPL', qty=1, order_type='market', filled_avg_price=100, timestamp=1),
+                Order(side='buy', symbol='AAPL', qty=1, order_type='stop', filled_avg_price=90, timestamp=2),
+            ]
+        )
+
+        b.strategy.positions.add(p1)
+        b.strategy.positions.add(p2)
+        b.test()
+
+        assert b.result.pnl == 60
+
 
