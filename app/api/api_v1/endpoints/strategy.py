@@ -53,7 +53,11 @@ async def run_strategy(request: RunStrategyRequest):
     # start from app root, get data
     app_path = Path(__file__).parent.parent.parent.parent
     data_path = app_path / data
-    ohlc = da.get_data(data_path, symbol="AAPL")
+    # if using API adapter
+    if da.name == 'APIDataAdapter':
+        ohlc = da.get_data(symbol=data)
+    else:
+        ohlc = da.get_data(data_path, symbol=data)
 
     backtest_result, plots = strategy.run(data=ohlc, parameters=parameters, plots=True)
     return RunStrategyResponse(backtest=backtest_result, plots=[p.as_dict() for p in plots])
