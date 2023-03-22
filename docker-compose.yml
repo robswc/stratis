@@ -5,16 +5,26 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile
+    expose:
+      - "8000"
     ports:
       - "8000:8000"
+
   stratis-next-js:
     depends_on:
       - app
     build:
       context: ./ui
       dockerfile: Dockerfile
-      args:
-        - NEXT_PUBLIC_BACKEND_URL=http://app
-        - NEXT_PUBLIC_BACKEND_PORT=8000
+    expose:
+      - "3000"
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - app
+      - stratis-next-js
     ports:
-      - "3000:3000"
+      - "${NGINX_PORT:-3000}:80"
