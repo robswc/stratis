@@ -1,4 +1,8 @@
-<img width="667" alt="stratis-full-logo" src="https://user-images.githubusercontent.com/38849824/224750446-a7255083-75eb-474b-b550-198ad21c0da8.png">
+<p align="center">
+<img width="480" alt="stratis-full-logo" src="https://user-images.githubusercontent.com/38849824/224750446-a7255083-75eb-474b-b550-198ad21c0da8.png">
+<img width="720" alt="stratis-full-logo" src="https://user-images.githubusercontent.com/38849824/226795630-475e0542-53ce-401b-801a-5b8b453f1ecf.png">
+</p>
+
 
 # Stratis
 
@@ -7,6 +11,8 @@
 [![GitHub repo size](https://img.shields.io/github/repo-size/robswc/stratis?style=for-the-badge)](https://github.com/robswc/stratis)
 [![Stars](https://img.shields.io/github/stars/robswc/stratis?style=for-the-badge)](https://github.com/robswc/stratis/stargazers)
 [![Twitter Follow](https://img.shields.io/twitter/follow/robswc?label=Twitter!&style=for-the-badge)](https://twitter.com/robswc)
+
+
 
 
 Stratis is a python-based framework for developing and testing strategies, inspired by the simplicity 
