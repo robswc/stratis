@@ -84,17 +84,12 @@ git clone https://github.com/robswc/stratis
 cd stratis
 
 # Run the docker-compose file
-docker-compose up -d # -d runs the container in the background
+docker-compose up -d # -d runs the containers in the background
 ```
 
-For more advanced usage, you can run app with python directly.  To do this, you will need to install the dependencies
-listed in the `requirements.txt` file.  You can do this by running the following command:
-
-```bash
-pip install -r app/requirements.txt
-```
-
-You can now run the app by running the following command:
+For more advanced usage, you can run app with python directly, as it is a FastAPI app under the hood.
+I would recommend using a [virtual environment](https://docs.python.org/3/library/venv.html) for this.
+You will also have to [install the requirements](https://pip.pypa.io/en/latest/user_guide/#requirements-files).
 
 ```bash
 cd app  # change directory to the app folder
