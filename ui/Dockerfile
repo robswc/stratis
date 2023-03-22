@@ -13,14 +13,20 @@ WORKDIR /app
 # Install dependencies
 RUN npm install
 
+# Add args
+ARG BACKEND_URL=http://localhost
+ENV BACKEND_URL=${BACKEND_URL}
+
+ARG BACKEND_PORT=8000
+ENV BACKEND_PORT=${BACKEND_PORT}
+
+ARG MAX_OLD_SPACE_SIZE=1024
+
 # Build NextJS app
-RUN npm run build
+RUN npm run build --max-old-space-size=${MAX_OLD_SPACE_SIZE}
 
 # Expose port 3000
 EXPOSE 3000
-
-ARG NEXT_PUBLIC_BACKEND_URL
-ARG NEXT_PUBLIC_BACKEND_PORT
 
 # Run NextJS app
 CMD ["npm", "run", "start"]
