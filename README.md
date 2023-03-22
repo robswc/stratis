@@ -74,7 +74,7 @@ can be difficult to install.
 
 To install Docker, follow the instructions [here](https://docs.docker.com/get-docker/).
 
-Once Docker is installed, you can run stratis by running the following command:
+Once Docker is installed, you can run stratis by running the following commands:
 
 ```bash
 # Clone the repository
