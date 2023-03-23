@@ -6,7 +6,7 @@ class $StrategyName(Strategy):
 
     # my_parameter = Parameter(10) # Example parameter, uncomment to use
 
-    def __init__(*args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # add any pre-compiled data here
         # https://github.com/robswc/stratis/wiki/Strategies#init-and-pre-compiled-data-series
