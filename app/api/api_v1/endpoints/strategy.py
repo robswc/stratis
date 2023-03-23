@@ -8,14 +8,17 @@ from starlette.responses import Response
 from components import Strategy
 from components.backtest.backtest import BacktestResult
 from components.ohlc import DataAdapter
+from loguru import logger
 
 router = APIRouter()
+
 
 @router.get("/strategy")
 async def list_all_strategies():
     """List all strategies"""
     strategies = Strategy.objects.all()
     return [s.as_model() for s in strategies]
+
 
 @router.get("/")
 async def get_strategy(name: str):
@@ -26,15 +29,18 @@ async def get_strategy(name: str):
     except ValueError:
         return Response(status_code=404)
 
+
 class RunStrategyResponse(BaseModel):
     backtest: BacktestResult
     plots: List[dict]
+
 
 class RunStrategyRequest(BaseModel):
     strategy: str
     parameters: dict
     adapter: str
     data: str
+
 
 @router.post("/", response_model=RunStrategyResponse)
 async def run_strategy(request: RunStrategyRequest):
@@ -66,11 +72,15 @@ async def run_strategy(request: RunStrategyRequest):
         ohlc = da.get_data(data_path, symbol=data)
 
     backtest_result, plots = strategy.run(data=ohlc, parameters=parameters, plots=True)
+    logger.info(f'Backtest result: {backtest_result}')
+    logger.info(f'Plots: ({len(plots)})')
     return RunStrategyResponse(backtest=backtest_result, plots=[p.as_dict() for p in plots])
+
 
 class SignalsRequest(BaseModel):
     signal_type: str
     strategy: RunStrategyRequest
+
 
 @router.post("/signals")
 async def run_signals(request: SignalsRequest):
