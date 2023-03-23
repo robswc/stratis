@@ -72,7 +72,7 @@ async def run_strategy(request: RunStrategyRequest):
         ohlc = da.get_data(data_path, symbol=data)
 
     backtest_result, plots = strategy.run(data=ohlc, parameters=parameters, plots=True)
-    logger.info(f'Backtest result: {backtest_result}')
+    logger.info(f'Backtest result: {backtest_result.get_overview()}')
     logger.info(f'Plots: ({len(plots)})')
     return RunStrategyResponse(backtest=backtest_result, plots=[p.as_dict() for p in plots])
 
