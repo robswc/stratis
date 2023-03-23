@@ -27,8 +27,7 @@ Stratis is a part of [Shenandoah Research's](https://shenandoah.capital/) Open s
 <a href="https://polyad.ai/"><img width="256" alt="poly-ad-logo" src="https://user-images.githubusercontent.com/38849824/226416451-1e511803-6e0e-4559-9247-c1c4f8bec720.png"></a>
 </span>
 
-### Please Note
-Stratis is under active development and is not yet ready for production use.  
+#### _Please Note Stratis is under active development and is not yet ready for production use._
 
 
 ## Basic Example
