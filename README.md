@@ -71,6 +71,8 @@ strategy = OHLCDemo().run(data)
 It is heavily recommended to use Docker to run stratis.  This is because stratis requires a number of dependencies that
 can be difficult to install.  
 
+
+### Docker
 To install Docker, follow the instructions [here](https://docs.docker.com/get-docker/).
 
 Once Docker is installed, you can run stratis by running the following commands:
@@ -86,11 +88,24 @@ cd stratis
 docker-compose up -d # -d runs the containers in the background
 ```
 
+The Stratis UI interface should now be accessible via: 
+
+[http://localhost:3000](http://localhost:3000)
+
+And the Stratis backend (core) should be accessible via:
+
+[http://localhost:8000](http://localhost:8000).
+
+### Python and NPM
+
 For more advanced usage, you can run app with python directly, as it is a FastAPI app under the hood.
 I would recommend using a [virtual environment](https://docs.python.org/3/library/venv.html) for this.
 You will also have to [install the requirements](https://pip.pypa.io/en/latest/user_guide/#requirements-files).
+The following commands will start the backend of stratis.
 
 ```bash
 cd app  # change directory to the app folder
 python python -m uvicorn main:app --reload  # reloads the app on file changes (useful for development)
 ```
+
+The frontend of stratis is a NextJS app.  The repository for the frontend can be found [here](https://github.com/robswc/stratis-ui).
