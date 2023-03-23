@@ -36,6 +36,17 @@ class BacktestResult(BaseModel):
     positions: List[Position]
     orders: List[Order]
 
+    def get_overview(self):
+        """Get a dict with the most important backtest results."""
+        return {
+            'pnl': self.pnl,
+            'wl_ratio': self.wl_ratio,
+            'trades': self.trades,
+            'winning_trades': self.winning_trades,
+            'losing_trades': self.losing_trades,
+        }
+
+
 
 class Backtest:
     def __init__(self, data, strategy):
@@ -48,15 +59,6 @@ class Backtest:
 
     def _sort_orders(self, orders: List[Order]):
         return sorted(orders, key=lambda x: x.timestamp)
-
-    def get_overview(self):
-        return {
-            'pnl': self.result.pnl,
-            'wl_ratio': self.result.wl_ratio,
-            'trades': self.result.trades,
-            'winning_trades': self.result.winning_trades,
-            'losing_trades': self.result.losing_trades,
-        }
 
     def test(self):
         logger.debug(f'Starting backtest for strategy {self.strategy.name}')
