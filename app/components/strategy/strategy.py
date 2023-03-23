@@ -13,10 +13,12 @@ from components.positions.position_manager import PositionManager
 from components.parameter import BaseParameter, Parameter, ParameterModel
 from components.strategy.decorators import extract_decorators
 
+
 class PlotConfig(BaseModel):
     color: str = 'blue'
     type: str = 'line'
     lineWidth: int = 1
+
 
 class Plot:
     def __init__(self, series: 'Series', **kwargs):
@@ -31,12 +33,15 @@ class Plot:
             'config': self.config.dict()
         }
 
+
 class StrategyManager(ComponentManager):
     _components = []
+
 
 class StrategyModel(BaseModel):
     name: str
     parameters: List[ParameterModel]
+
 
 class BaseStrategy:
     objects = StrategyManager
@@ -64,7 +69,6 @@ class BaseStrategy:
 
         self.register()
 
-
         # strategy decorators
         self._step_methods = []
         self._before_methods = []
@@ -84,7 +88,6 @@ class BaseStrategy:
 
     def export_plots(self, plots: List[Plot]):
         self.plots = plots
-
 
     def as_model(self) -> StrategyModel:
         return StrategyModel(
@@ -188,5 +191,3 @@ class BaseStrategy:
             logger.debug(f'Requested plots, found {len(plots)}')
             return b.result, plots
         return b.result
-
-

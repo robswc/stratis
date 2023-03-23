@@ -1,5 +1,5 @@
 import concurrent.futures
-from typing import Optional, List
+from typing import Optional, List, Union
 
 from loguru import logger
 from pydantic import BaseModel
@@ -41,7 +41,7 @@ class Backtest:
     def __init__(self, data, strategy):
         self.data = data
         self.strategy = strategy
-        self.result = None
+        self.result: Union[BacktestResult, None] = None
 
     def _get_orders_with_filled_timestamp(self, orders):
         return [o for o in orders if o.filled_timestamp is not None]
