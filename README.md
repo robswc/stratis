@@ -1,6 +1,6 @@
 <p align="center">
 <img width="480" alt="stratis-full-logo" src="https://user-images.githubusercontent.com/38849824/224750446-a7255083-75eb-474b-b550-198ad21c0da8.png">
-<img width="720" alt="stratis-full-logo" src="https://user-images.githubusercontent.com/38849824/226795630-475e0542-53ce-401b-801a-5b8b453f1ecf.png">
+<img width="720" alt="stratis-full-logo" src="https://user-images.githubusercontent.com/38849824/227098394-4160f118-a8a9-45d6-a4db-33872aa25043.png">
 </p>
 
 
