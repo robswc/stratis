@@ -24,6 +24,9 @@ class Series:
     def __repr__(self):
         return str(float(self))
 
+    def __len__(self):
+        return len(self._data)
+
     def __float__(self):
         if isinstance(self._data, list):
             return self._data[self._loop_index]
