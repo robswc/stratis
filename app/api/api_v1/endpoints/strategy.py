@@ -47,8 +47,14 @@ async def run_strategy(request: RunStrategyRequest):
     parameters = request.parameters if request.parameters else {}
 
     # get strategy and data adapter
-    da = DataAdapter.objects.get(name=data_adapter_name)
-    strategy = Strategy.objects.get(name=name)
+    try:
+        da = DataAdapter.objects.get(name=data_adapter_name)
+    except ValueError:
+        return Response(status_code=404, content="Data adapter not found")
+    try:
+        strategy = Strategy.objects.get(name=name)
+    except ValueError:
+        return Response(status_code=404, content="Strategy not found")
 
     # start from app root, get data
     app_path = Path(__file__).parent.parent.parent.parent
