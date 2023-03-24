@@ -4,7 +4,6 @@ import pandas as pd
 from loguru import logger
 
 from components.strategy import Series
-from components.strategy.builtins.ta.nz import nz
 
 import numpy as np
 
