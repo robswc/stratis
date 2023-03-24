@@ -1,3 +1,5 @@
+from typing import Union
+
 import pandas as pd
 from loguru import logger
 
@@ -7,22 +9,53 @@ EMPTY_DATA = pd.DataFrame(columns=['open', 'high', 'low', 'close', 'volume', 'ti
 EMPTY_DATA.set_index('timestamp', inplace=True)
 
 
+class FutureTimestampRequested(Exception):
+    def __init__(self, dataframe, index):
+        super().__init__(f'Future timestamp requested. You must ensure the OHLCs resolution is set for future '
+                         f'timestamp extrapolation.\n'
+                         f'Dataframe length: {len(dataframe)}, index: {index}\n')
+
+
 class OHLC:
     """
     OHLCV data class. This class is used to store OHLCV data.
     Wraps around a pandas dataframe.
     """
 
-    def __init__(self, symbol: Symbol = None, dataframe: pd.DataFrame = None):
+    def __init__(
+            self,
+            symbol: Symbol = None,
+            dataframe: pd.DataFrame = None,
+            resolution: Union[int, None] = None,
+    ):
         self.symbol = symbol
+
+        # if no dataframe is provided, use an empty dataframe
         if dataframe is None:
             dataframe = EMPTY_DATA
         self.dataframe = dataframe
+
+        # if no resolution is provided, attempt to interpret it
+        if resolution is None:
+            self._interpret_resolution()
+        else:
+            self.resolution = resolution
         self._index = 0
 
         # if a dataframe is provided, validate it
         if dataframe is not None:
             self._validate()
+
+    def _interpret_resolution(self):
+        """Attempts to interpret the resolution of the OHLC data."""
+        # take a random sample of the data
+        sample = self.dataframe.sample(10)
+        # get the difference between the timestamps
+        differences = sample.index.to_series().diff().dropna()
+        # get the most common difference
+        most_common = differences.value_counts().idxmax()
+        # convert to minutes
+        self.resolution = most_common / 1000 / 60
 
     def advance_index(self, n: int = 1):
         self._index += n
@@ -65,7 +98,14 @@ class OHLC:
         return self.dataframe.index[self._index]
 
     def get_timestamp(self, offset: int = 0):
-        return self.dataframe.index[self._index + offset]
+        try:
+            return self.dataframe.index[self._index + offset]
+        except IndexError:
+            if self._index + offset == len(self.dataframe):
+                if self.resolution is None:
+                    raise FutureTimestampRequested(self.dataframe, self._index + offset)
+                else:
+                    return self.dataframe.index[-1] + self.resolution * 1000 * 60
 
     def all(self, column: str):
         try:
@@ -93,7 +133,8 @@ class OHLC:
         if self.dataframe.index.name != 'timestamp':
             raise ValueError(f'Invalid data. Index must be named "timestamp", not "{self.dataframe.index.name}".')
 
-    def from_csv(self, path: str, symbol: str):
+    @staticmethod
+    def from_csv(path: str, symbol: str):
         """
         Loads data from a csv file.
         :param symbol: symbol for the data
@@ -102,15 +143,17 @@ class OHLC:
         """
 
         # strategy a symbol from the symbol string
-        self.symbol = Symbol(symbol)
+        symbol = Symbol(symbol)
 
         # load the data from the csv file
-        self.dataframe = pd.read_csv(path)
-        self.dataframe.set_index('timestamp', inplace=True)
+        dataframe = pd.read_csv(path)
+        dataframe.set_index('timestamp', inplace=True)
 
-        self._validate()
+        # create and validate OHLC object
+        ohlc = OHLC(symbol=symbol, dataframe=dataframe)
+        ohlc._validate()
 
-        return self
+        return ohlc
 
     def to_dict(self):
         df = self.dataframe.copy()

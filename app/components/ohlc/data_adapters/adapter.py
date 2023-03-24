@@ -41,6 +41,6 @@ class CSVAdapter(DataAdapter):
             logger.warning('No symbol provided, using filename as symbol.')
             symbol = path.split('/')[-1].split('.')[0]
 
-        return OHLC().from_csv(path, symbol)
+        return OHLC.from_csv(path, symbol)
 
 

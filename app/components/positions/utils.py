@@ -18,8 +18,6 @@ def add_closing_order_to_position(position, ohlc: 'OHLC'):
         timestamp=ohlc.timestamp,
     )
 
-    print('closing order is', order)
-
     position.orders.append(order)
 
 
