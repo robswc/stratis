@@ -1,5 +1,7 @@
+import random
 from typing import Union
 
+import numpy as np
 import pandas as pd
 from loguru import logger
 
@@ -48,14 +50,20 @@ class OHLC:
 
     def _interpret_resolution(self):
         """Attempts to interpret the resolution of the OHLC data."""
-        # take a random sample of the data
-        sample = self.dataframe.sample(10)
-        # get the difference between the timestamps
-        differences = sample.index.to_series().diff().dropna()
-        # get the most common difference
-        most_common = differences.value_counts().idxmax()
-        # convert to minutes
-        self.resolution = most_common / 1000 / 60
+        # generate a sample size that is 25% of the data
+        sample_size = len(self.dataframe) // 4
+
+        # generate a set of random indexes to sample
+        indexes = random.sample(range(len(self.dataframe) - 1), sample_size)
+
+        # take random sample pairs and calculate the difference between timestamps
+        diffs = [self.dataframe.index[i + 1] - self.dataframe.index[i] for i in indexes]
+
+        # get the most common difference, convert to minutes
+        self.resolution = int(max(set(diffs), key=diffs.count) / 1000 / 60)
+
+
+
 
     def advance_index(self, n: int = 1):
         self._index += n
@@ -102,10 +110,7 @@ class OHLC:
             return self.dataframe.index[self._index + offset]
         except IndexError:
             if self._index + offset == len(self.dataframe):
-                if self.resolution is None:
-                    raise FutureTimestampRequested(self.dataframe, self._index + offset)
-                else:
-                    return self.dataframe.index[-1] + self.resolution * 1000 * 60
+                raise FutureTimestampRequested(self.dataframe, self._index + offset)
 
     def all(self, column: str):
         try:

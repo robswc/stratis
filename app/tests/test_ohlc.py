@@ -41,3 +41,7 @@ class TestOHLC:
         assert ohlc._index == 3
         ohlc.reset_index()
         assert ohlc._index == 0
+
+    def test_interpret_resolution(self):
+        ohlc = OHLC.from_csv(PATH, 'AAPL')
+        assert ohlc.resolution == 5

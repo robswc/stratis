@@ -1,5 +1,7 @@
+import datetime
 from typing import List
 
+from components.ohlc.ohlc import FutureTimestampRequested
 from components.orders.order import Order
 from components.positions.position import Position
 from components.positions.utils import add_closing_order_to_position
@@ -21,7 +23,15 @@ class PositionManager:
         """Opens a new position"""
 
         # get the timestamp (it's offset by 1 because we're using the previous close)
-        timestamp = self._strategy.data.get_timestamp(offset=1)
+        try:
+            timestamp = self._strategy.data.get_timestamp(offset=1)
+        except FutureTimestampRequested:
+            logger.warning(f'{self._strategy} is opening a position in the future.')
+            last_timestamp = self._strategy.data.get_timestamp(offset=0)
+            resolution = self._strategy.data.resolution
+            timestamp = last_timestamp + (resolution * 60 * 1000)  # convert to milliseconds
+            logger.warning(f'Extrapolating timestamp to {timestamp} ({datetime.datetime.fromtimestamp(timestamp)})'
+                           f'(resolution: {resolution})')
 
         # create order
         order = Order(
