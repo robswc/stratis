@@ -39,7 +39,11 @@ class OHLC:
 
         # if no resolution is provided, attempt to interpret it
         if resolution is None:
-            self._interpret_resolution()
+            try:
+                self._interpret_resolution()
+            except ValueError:
+                logger.error(f'Unable to interpret resolution for {self.symbol}')
+                self.resolution = 0
         else:
             self.resolution = resolution
         self._index = 0
@@ -61,9 +65,6 @@ class OHLC:
 
         # get the most common difference, convert to minutes
         self.resolution = int(max(set(diffs), key=diffs.count) / 1000 / 60)
-
-
-
 
     def advance_index(self, n: int = 1):
         self._index += n
