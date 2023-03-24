@@ -1,24 +1,31 @@
-from loguru import logger
+from typing import List
+
+from components.positions import Position
 
 
-class ComponentManager:
+def remove_overlapping_positions(positions: List[Position], max_overlap: int = 1):
+    """Remove overlapping positions from a list of positions."""
 
-    _components = []
+    new_positions = []
 
-    @classmethod
-    def register(cls, component):
-        if component in cls._components:
-            return
-        cls._components.append(component)
-        logger.debug(f'Registered component {component} ({component.__module__})')
+    # Sort the positions by their opened timestamp
+    sorted_positions = sorted(positions, key=lambda x: x.opened_timestamp)
 
-    @classmethod
-    def all(cls):
-        return [o() for o in cls._components]
+    i = 0
+    last_timestamp = None
+    while i < len(sorted_positions):
+        p = sorted_positions[i]
+        if last_timestamp is None:
+            last_timestamp = p.closed_timestamp
+            new_positions.append(p)
+            continue
 
-    @classmethod
-    def get(cls, name):
-        for component in cls._components:
-            if component.__name__ == name:
-                return component()
-        raise ValueError(f'Component "{name}" not found.')
+        no_overlap = last_timestamp < p.opened_timestamp
+        if no_overlap:
+            new_positions.append(p)
+            last_timestamp = p.closed_timestamp
+
+        i += 1
+
+    # Return the modified copy of the list
+    return new_positions
