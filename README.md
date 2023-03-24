@@ -43,18 +43,21 @@ the full power of python at your disposal.
 ```python
 class OHLCDemo(Strategy):
 
-    @on_step  # the on_step decorator runs the function on every "step" of the OHLC data
+    @on_step  # on_step decorated, runs every "step" of the OHLC data
     def print_ohlc(self):
 
-        # strategy shorthands for the OHLC data
+        # shorthands for the OHLC data
         timestamp = self.data.timestamp
         close = self.data.close
 
-        # if the timestamp is a multiple of 3600000 (1 hour), print the timestamp and close price
+        # if the timestamp is a multiple of 3600000 (1 hour)
         if timestamp % 3600000 == 0:
-            print(f'{timestamp}: {close}')
-                
+            # create a datetime object from the timestamp
+            dt = datetime.datetime.fromtimestamp(timestamp / 1000)
+            if dt.hour == 10:
+                print(f'{dt}: {close}')     
 ```
+
 ```python
 data = CSVAdapter('data/AAPL.csv')
 strategy = OHLCDemo().run(data)
@@ -64,12 +67,15 @@ strategy = OHLCDemo().run(data)
 ## Table of Contents
 
 - [Installation](#Installation)
-- [Features](#features)
+  - [Docker](#Docker)
+  - [Python and NPM](#Python-and-NPM)
+
+[//]: # (- [Features]&#40;#features&#41;)
 
 ## Installation
 
-It is heavily recommended to use Docker to run stratis.  This is because stratis requires a number of dependencies that
-can be difficult to install.  
+It is heavily recommended to use [Docker](https://www.docker.com/resources/what-container/) to run stratis.  This is because stratis requires a number of dependencies that
+can be difficult to install without Docker.  
 
 
 ### Docker
@@ -99,6 +105,8 @@ And the Stratis backend (core) should be accessible via:
 ### Python and NPM
 
 For more advanced usage, you can run app with python directly, as it is a FastAPI app under the hood.
+Please note, this may or may not work for Windows and MacOS, as I have only tested it on Linux.
+
 I would recommend using a [virtual environment](https://docs.python.org/3/library/venv.html) for this.
 You will also have to [install the requirements](https://pip.pypa.io/en/latest/user_guide/#requirements-files).
 The following commands will start the backend of stratis.

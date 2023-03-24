@@ -4,6 +4,8 @@ from components.orders.order import Order
 from components.positions.position import Position
 from components.positions.utils import add_closing_order_to_position
 
+from loguru import logger
+
 
 class PositionManager:
     def __init__(self, strategy: 'BaseStrategy'):
@@ -39,8 +41,11 @@ class PositionManager:
 
     def close(self):
         """Closes the most recent position"""
-        position_to_close = self.positions[-1]
-        add_closing_order_to_position(position=position_to_close, ohlc=self._strategy.data)
+        try:
+            position_to_close = self.positions[-1]
+            add_closing_order_to_position(position=position_to_close, ohlc=self._strategy.data)
+        except IndexError:
+            logger.error(f'{self._strategy} has no positions to close')
 
     def all(self):
         return self.positions
