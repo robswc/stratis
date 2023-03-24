@@ -11,18 +11,19 @@ class Signal(BaseModel):
     quantity: Optional[int] = None
     # symbol: Optional[str] = None
     price: Optional[float] = None
+    timestamp: Optional[int] = None
 
     def from_position(self, position: 'Position'):
         self.order_type = position.orders[0].type
         self.side = position.get_side()
         self.quantity = position.orders[0].qty
         self.price = position.orders[0].filled_avg_price
+        self.timestamp = position.orders[0].timestamp
         self.id = self.get_id()
         return self
 
     def get_id(self):
         return hashlib.md5(str(self).encode()).hexdigest()
-
 
 
 class BracketSignal(Signal):

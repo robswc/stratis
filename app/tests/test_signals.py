@@ -11,6 +11,7 @@ ROOT_ORDER = Order(
     timestamp=1000
 )
 
+
 class TestSignals:
     def test_basic_signal(self):
         p = Position(
@@ -26,9 +27,7 @@ class TestSignals:
         assert s.quantity == 100
         assert s.price == 100
 
-
     def test_bracket_signal(self):
-
         stop_order = StopOrder(
             type='stop',
             side='sell',
@@ -44,7 +43,6 @@ class TestSignals:
             limit_price=110,
         )
 
-
         p = Position(
             orders=[ROOT_ORDER, stop_order, limit_order],
         )
@@ -58,6 +56,6 @@ class TestSignals:
         assert s.take_profit == 110
 
         # check that serializing to JSON works as expected
-        assert s.json() == '{"id": "f37e463a01354c4931ca56122ecca2ea", "order_type": "market", "side": "buy", ' \
-                           '"quantity": 100, "price": 100.0, ' \
-                           '"stop_loss": 90.0, "take_profit": 110.0}'
+        assert s.json() == ('{"id": "3b8cf71b56751e9e58f69ee2650cf483", "order_type": "market", "side": '
+                            '"buy", "quantity": 100, "price": 100.0, "timestamp": 1000, "stop_loss": '
+                            '90.0, "take_profit": 110.0}')
