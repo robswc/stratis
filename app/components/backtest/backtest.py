@@ -4,6 +4,7 @@ from typing import Optional, List, Union
 from loguru import logger
 from pydantic import BaseModel
 
+from components.backtest.utils import remove_overlapping_positions
 from components.orders.order import Order
 from components.positions.position import Position
 
@@ -47,7 +48,6 @@ class BacktestResult(BaseModel):
         }
 
 
-
 class Backtest:
     def __init__(self, data, strategy):
         self.data = data
@@ -72,6 +72,9 @@ class Backtest:
             for p in positions:
                 executor.submit(p.test, self.data)
         logger.debug(f'Finished testing {len(positions)} positions in parallel.')
+
+        # after all positions have been tested, we can check for overlapping positions
+        positions = remove_overlapping_positions(positions, max_overlap=0)
 
         all_position_orders = []
         for p in positions:

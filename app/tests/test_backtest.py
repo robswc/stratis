@@ -1,6 +1,7 @@
 from components.backtest.backtest import Backtest
 from components.ohlc import CSVAdapter
-from components.orders import Order
+from components.orders import Order, LimitOrder, StopOrder
+from components.orders.enums import OrderSide
 from components.positions import Position
 from storage.strategies.examples.sma_cross_over import SMACrossOver
 
@@ -64,7 +65,6 @@ class TestBacktest:
         # check position
         assert p.size == 0
         assert p.pnl == 1.9999999999999716
-
 
     def test_stop_loss(self):
         strategy = SMACrossOver(data=OHLC)
@@ -138,15 +138,15 @@ class TestBacktest:
 
         p2 = Position(
             orders=[
-                Order(side='sell', symbol='AAPL', qty=1, order_type='market', filled_avg_price=100, timestamp=1),
-                Order(side='buy', symbol='AAPL', qty=1, order_type='stop', filled_avg_price=90, timestamp=2),
+                Order(side='sell', symbol='AAPL', qty=1, order_type='market', filled_avg_price=100, timestamp=10),
+                Order(side='buy', symbol='AAPL', qty=1, order_type='stop', filled_avg_price=90, timestamp=20),
             ]
         )
 
         p3 = Position(
             orders=[
-                Order(side='buy', symbol='AAPL', qty=1, order_type='market', filled_avg_price=100, timestamp=1),
-                Order(side='sell', symbol='AAPL', qty=1, order_type='stop', filled_avg_price=110, timestamp=2),
+                Order(side='buy', symbol='AAPL', qty=1, order_type='market', filled_avg_price=100, timestamp=100),
+                Order(side='sell', symbol='AAPL', qty=1, order_type='stop', filled_avg_price=110, timestamp=200),
             ]
         )
 
@@ -157,4 +157,70 @@ class TestBacktest:
 
         assert b.result.pnl == 70
 
+    def test_backtest_short_with_order_types(self):
 
+        b = Backtest(strategy=SMACrossOver(), data=OHLC)
+
+        side = OrderSide.SELL
+        open_order = Order(
+            type='market',
+            side=side,
+            qty=100,
+            symbol='AAPL',
+            filled_avg_price=257.33,
+            timestamp=1653984000000,
+            filled_timestamp=1653984000000,
+        )
+        take_profit = LimitOrder(
+            side=OrderSide.inverse(side),
+            qty=100,
+            symbol='AAPL',
+            limit_price=256,
+        )
+        stop_loss = StopOrder(
+            side=OrderSide.inverse(side),
+            qty=100,
+            symbol='AAPL',
+            stop_price=300
+        )
+
+        p = Position(orders=[open_order, take_profit, stop_loss])
+        b.strategy.positions.add(p)
+        b.test()
+        tested_position = b.strategy.positions.all()[0]
+        print(tested_position)
+
+        assert tested_position.size == 0
+        assert tested_position.closed_timestamp == 1653984600000
+
+    def test_backtest_long_with_order_types(self):
+        b = Backtest(strategy=SMACrossOver(), data=OHLC)
+        side = OrderSide.BUY
+        open_order = Order(
+            type='market',
+            side=side,
+            qty=100,
+            symbol='AAPL',
+            filled_avg_price=257.33,
+            timestamp=1653984000000,
+            filled_timestamp=1653984000000,
+        )
+        take_profit = LimitOrder(
+            side=OrderSide.inverse(side),
+            qty=100,
+            symbol='AAPL',
+            limit_price=260,
+        )
+        stop_loss = StopOrder(
+            side=OrderSide.inverse(side),
+            qty=100,
+            symbol='AAPL',
+            stop_price=100
+        )
+
+        p = Position(orders=[open_order, take_profit, stop_loss])
+        b.strategy.positions.add(p)
+        b.test()
+        tested_position = b.strategy.positions.all()[0]
+        assert tested_position.size == 0
+        assert tested_position.closed_timestamp == 1654183500000

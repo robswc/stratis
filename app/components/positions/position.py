@@ -29,7 +29,9 @@ class Position(BaseModel):
         self.id = self._get_id()
 
     def __str__(self):
-        return f'Position: {""} | {self.side} | {self.size} | {self.cost_basis} | {self.pnl}'
+        return f'Position: {""}\t[{self.side.upper()}]\t{self.size} {self.average_entry_price} -> ' \
+               f'{self.average_exit_price} \t pnl:{round(self.pnl, 2)} (opn:' \
+               f' {self.opened_timestamp}, cls: {self.closed_timestamp})'
 
     def _get_id(self):
         """Get the id of the position."""
@@ -83,7 +85,7 @@ class Position(BaseModel):
     def _fill_order(self, order: Union[Order, StopOrder, LimitOrder], ohlc: 'OHLC' = None):
         """Handles TBD orders.  Sets the timestamp and fills the order if it was filled."""
         start_index = ohlc.index.get_loc(self.orders[0].timestamp)
-        df = ohlc.dataframe.iloc[start_index:]
+        df = ohlc.dataframe.iloc[start_index + 1:]
         # loop through the df
         for index, row in df.iterrows():
             # handle stops

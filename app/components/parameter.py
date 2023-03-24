@@ -44,6 +44,8 @@ class Parameter:
         return self.value.__index__()
 
 
+
+
 class IntegerParameter(BaseParameter):
     def __init__(self, value: int, min_value: int = 0, max_value: int = 9999):
         self.value = int(value)
@@ -63,7 +65,7 @@ class IntegerParameter(BaseParameter):
 
 
 class FloatParameter(BaseParameter):
-    def __init__(self, value: float, min_value: float, max_value: float):
+    def __init__(self, value: float, min_value: float = -9999, max_value: float = 9999):
         self.value = float(value)
         self.min_value = min_value
         self.max_value = max_value

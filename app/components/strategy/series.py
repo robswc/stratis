@@ -27,6 +27,12 @@ class Series:
     def __len__(self):
         return len(self._data)
 
+    def __getitem__(self, item):
+        if isinstance(self._data, list):
+            return self._data[item]
+        if isinstance(self._data, pd.Series):
+            return self._data.iloc[item]
+
     def __float__(self):
         if isinstance(self._data, list):
             return self._data[self._loop_index]

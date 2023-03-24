@@ -1,4 +1,5 @@
 import pandas as pd
+from loguru import logger
 
 from components.ohlc.symbol import Symbol
 
@@ -32,7 +33,11 @@ class OHLC:
     def _get_ohlc(self, column: str, index: int = None):
         if index is None:
             index = self._index
-        value = self.dataframe[column].iloc[index]
+        try:
+            value = self.dataframe[column].iloc[index]
+        except IndexError:
+            logger.error(f'Index out of range. Index: {index}, Length: {len(self.dataframe)}')
+            value = None
         return value
 
     @property
@@ -63,7 +68,10 @@ class OHLC:
         return self.dataframe.index[self._index + offset]
 
     def all(self, column: str):
-        return self.dataframe[column]
+        try:
+            return self.dataframe[column]
+        except KeyError:
+            return []
 
     def __str__(self):
         return f'OHLC: {self.symbol}'
