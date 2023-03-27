@@ -3,7 +3,7 @@ from typing import List
 
 from components.ohlc.ohlc import FutureTimestampRequested
 from components.orders.order import Order
-from components.positions.position import Position
+from components.positions.positions import Position
 from components.positions.utils import add_closing_order_to_position
 
 from loguru import logger

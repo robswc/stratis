@@ -1,1 +1,1 @@
-from components.positions.position import Position
+from components.positions.positions import Position

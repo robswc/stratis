@@ -5,7 +5,7 @@ from pydantic import ValidationError
 
 from components.orders.order import Order
 from components.orders.enums import OrderType, OrderSide as Side
-from components.positions.position import Position
+from components.positions.positions import Position
 
 TIMESTAMP = int(datetime.now().timestamp())
 DETERMINISTIC_TIMESTAMP = 1610000000

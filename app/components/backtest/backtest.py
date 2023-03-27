@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from components.backtest.utils import remove_overlapping_positions
 from components.orders.order import Order
-from components.positions.position import Position
+from components.positions.positions import Position
 
 
 def get_effect(position: Position, order: Order):

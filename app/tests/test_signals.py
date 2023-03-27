@@ -1,5 +1,5 @@
 from components.orders.order import Order, StopOrder, LimitOrder
-from components.positions.position import Position
+from components.positions.positions import Position
 from components.orders.signals import Signal, BracketSignal
 
 ROOT_ORDER = Order(
