@@ -39,7 +39,18 @@ class RunStrategyRequest(BaseModel):
     strategy: str
     parameters: dict
     adapter: str
-    data: str
+    adapter_kwargs: dict
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "strategy": "SMACrossOver",
+                "parameters": {},
+                "adapter": "CSVAdapter",
+                "adapter_kwargs": {
+                    "path": "tests/data/AAPL.csv"}
+            }
+        }
 
 
 @router.post("/", response_model=RunStrategyResponse)
@@ -49,7 +60,7 @@ async def run_strategy(request: RunStrategyRequest):
     # get arguments from request
     name = request.strategy
     data_adapter_name = request.adapter
-    data = str(request.data)
+    data_adapter_kwargs = request.adapter_kwargs
     parameters = request.parameters if request.parameters else {}
 
     # get strategy and data adapter
@@ -62,14 +73,7 @@ async def run_strategy(request: RunStrategyRequest):
     except ValueError:
         return Response(status_code=404, content="Strategy not found")
 
-    # start from app root, get data
-    app_path = Path(__file__).parent.parent.parent.parent
-    data_path = app_path / data
-    # if using API adapter
-    if da.name == 'APIDataAdapter':
-        ohlc = da.get_data(symbol=data)
-    else:
-        ohlc = da.get_data(data_path, symbol=data)
+    ohlc = da.get_data(**data_adapter_kwargs)
 
     backtest_result, plots = strategy.run(data=ohlc, parameters=parameters, plots=True)
     logger.info(f'Backtest result: {backtest_result.get_overview()}')

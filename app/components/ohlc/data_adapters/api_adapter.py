@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import pandas as pd
 import requests
@@ -11,7 +12,13 @@ class APIDataAdapter(DataAdapter):
 
     url = os.getenv('DATA_API_URL', None)
 
-    def get_data(self, symbol):
+    def get_data(
+            self,
+            start: datetime = None,
+            end: datetime = None,
+            symbol: str = None,
+            **kwargs
+    ):
 
         if self.url is None:
             raise Exception('DATA_API_URL not set')

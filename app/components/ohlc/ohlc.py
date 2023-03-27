@@ -1,3 +1,4 @@
+import datetime
 import random
 from typing import Union
 
@@ -161,7 +162,34 @@ class OHLC:
 
         return ohlc
 
+    def trim(self, start: int, end: int):
+        """
+        Trims the OHLC data to the specified range.
+        :param start: Start index.
+        :param end: End index.
+        :return: self
+        """
+
+        start_dt = datetime.datetime.fromtimestamp(start / 1000)
+        end_dt = datetime.datetime.fromtimestamp(end / 1000)
+
+        df = self.dataframe.copy()
+        logger.debug(f'Trimming data from {start_dt} to {end_dt}')
+        logger.debug(f'Original data length: {len(df)}')
+        df = df.loc[start:end]
+        self.dataframe = df
+        self._validate()
+        logger.debug(f'Trimmed data length: {len(df)}')
+        return self
+
+    def __len__(self):
+        return len(self.dataframe)
+
     def to_dict(self):
         df = self.dataframe.copy()
         df['time'] = df.index
-        return df.to_dict(orient='records')
+        return {
+            'symbol': self.symbol,
+            'resolution': self.resolution,
+            'data': df.to_dict(orient='records')
+        }

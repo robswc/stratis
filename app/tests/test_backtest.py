@@ -5,7 +5,7 @@ from components.orders.enums import OrderSide
 from components.positions import Position
 from storage.strategies.examples.sma_cross_over import SMACrossOver
 
-OHLC = CSVAdapter().get_data('tests/data/AAPL.csv', 'AAPL')
+OHLC = CSVAdapter().get_data(path='tests/data/AAPL.csv', symbol='AAPL')
 STRATEGY = SMACrossOver(data=OHLC)
 
 

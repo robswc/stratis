@@ -100,7 +100,7 @@ The Stratis UI interface should now be accessible via:
 
 And the Stratis backend (core) should be accessible via:
 
-[http://localhost:8000](http://localhost:8000).
+[http://localhost:8000](http://localhost:8000)
 
 ### Python and NPM
 
