@@ -17,7 +17,7 @@ class Series:
         self.name = name
 
     def advance_index(self):
-        if self._loop_index + 1 == len(self._data):
+        if self._loop_index + 1 > len(self._data):
             raise EndOfData(
                 f'End of data reached ({self.name}). Index: {self._loop_index}, Length: {len(self._data)}, Data:'
                 f' {self._data[-5:]}'
