@@ -29,6 +29,7 @@ class Order(BaseModel):
     client_order_id: Optional[str]
     filled_avg_price: Optional[float]
     filled_timestamp: Optional[int]
+    did_not_fill: bool = False
 
     @staticmethod
     def create_market_order(symbol: str, qty: float, side: OrderSide):
@@ -38,6 +39,9 @@ class Order(BaseModel):
             side=side,
             type=OrderType.MARKET,
         )
+
+    def is_working(self):
+        return self.filled_timestamp is None and self.did_not_fill is False
 
     def _timestamp_to_datetime(self, timestamp: int):
         if timestamp is not None:

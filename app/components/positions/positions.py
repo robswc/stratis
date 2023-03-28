@@ -113,6 +113,11 @@ class Position(BaseModel):
         # if the order is still missing a timestamp, it was never filled
         if order.filled_timestamp is None:
             logger.warning(f'Order {order.id} was never filled')
+            logger.warning(f'{self}')
+            for order in self.orders:
+                logger.warning(f'\t{order}')
+            # set order did not fill to true
+            order.did_not_fill = True
             return
         else:
             order.timestamp = order.filled_timestamp
@@ -173,7 +178,7 @@ class Position(BaseModel):
             self.handle_order(order=order, ohlc=ohlc)
 
         # if there are still working orders, handle them
-        working_orders = [o for o in self.orders if o.filled_timestamp is None]
+        working_orders = [o for o in self.orders if o.is_working()]
         if len(working_orders) > 0:
 
             # handle all orders without a filled timestamp, as these are TBD
