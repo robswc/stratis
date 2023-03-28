@@ -1,4 +1,5 @@
 import concurrent.futures
+import queue
 from typing import Optional, List, Union
 
 from loguru import logger
@@ -23,6 +24,17 @@ def get_effect(position: Position, order: Order):
             return 'increase'
     else:
         return 'increase'
+
+
+def worker(q, data):
+    while not q.empty():
+        try:
+            position = q.get_nowait()
+            position.test(data)
+        except queue.Empty:
+            break
+        finally:
+            q.task_done()
 
 
 class BacktestResult(BaseModel):
@@ -66,11 +78,20 @@ class Backtest:
         positions = self.strategy.positions.all()
         orders = self.strategy.orders.all()
 
+        # create a bounded queue to hold the positions
+        position_queue = queue.Queue()
+        for position in positions:
+            position_queue.put(position)
+
         # use concurrent futures to test orders in parallel
         logger.debug(f'Testing {len(positions)} positions in parallel...')
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            for p in positions:
-                executor.submit(p.test, self.data)
+            for _ in range(len(positions)):
+                executor.submit(worker, position_queue, self.data)
+
+        # wait for all positions to be tested
+        position_queue.join()
+
         logger.debug(f'Finished testing {len(positions)} positions in parallel.')
 
         # after all positions have been tested, we can check for overlapping positions
