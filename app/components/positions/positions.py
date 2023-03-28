@@ -177,7 +177,7 @@ class Position(BaseModel):
         for order in filled_orders:
             self.handle_order(order=order, ohlc=ohlc)
 
-        # if there are still working orders, handle them
+        # if there are still working orders (usually limit, stops, etc), handle them
         working_orders = [o for o in self.orders if o.is_working()]
         if len(working_orders) > 0:
 

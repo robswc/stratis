@@ -52,7 +52,8 @@ class Order(BaseModel):
     def __str__(self):
         order_type = OrderType.abbreviation(self.type).upper()
         side = self.side.upper()
-        return f'{order_type} {side} [{abs(self.qty)}] {self.symbol} @ {self.filled_avg_price}\t' \
+        return f'[{self.get_id()[:8]}]\t{order_type} {side} [{abs(self.qty)}] {self.symbol} @' \
+               f' {self.filled_avg_price}\t' \
                f'({self._timestamp_to_datetime(self.timestamp)})'
 
     def __hash__(self):
