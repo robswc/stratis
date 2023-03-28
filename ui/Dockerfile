@@ -4,8 +4,8 @@ FROM node:18-alpine AS base
 RUN apk add --no-cache git
 
 # Clone from GitHub
-ADD https://api.github.com/repos/robswc/stratis-ui latest_commit
-RUN git clone https://github.com/robswc/stratis-ui.git /app
+ADD https://api.github.com/repos/robswc/stratis-ui-legacy latest_commit
+RUN git clone https://github.com/robswc/stratis-ui-legacy.git /app
 
 # Set working directory
 WORKDIR /app
