@@ -23,6 +23,7 @@ class Position(BaseModel):
     pnl: Optional[float] = 0
     opened_timestamp: Optional[int] = None
     closed_timestamp: Optional[int] = None
+    is_tested: bool = False
 
     def __int__(self):
         super().__init__()
