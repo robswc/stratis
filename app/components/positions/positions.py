@@ -112,7 +112,7 @@ class Position(BaseModel):
 
         # if the order is still missing a timestamp, it was never filled
         if order.filled_timestamp is None:
-            logger.warning(f'Order {order.id} was never filled')
+            logger.warning(f'Order {order.get_id()} was never filled')
             logger.warning(f'{self}')
             for order in self.orders:
                 logger.warning(f'\t{order}')
@@ -177,7 +177,7 @@ class Position(BaseModel):
         for order in filled_orders:
             self.handle_order(order=order, ohlc=ohlc)
 
-        # if there are still working orders (usually limit, stops, etc), handle them
+        # if there are still working orders, handle them
         working_orders = [o for o in self.orders if o.is_working()]
         if len(working_orders) > 0:
 
@@ -190,12 +190,13 @@ class Position(BaseModel):
             sorted_orders = sorted(filled_working_orders, key=lambda o: o.timestamp)
 
             # handle the first order
-            first_order = sorted_orders[0]
-            self.handle_order(order=first_order, ohlc=ohlc)
+            first_order = sorted_orders[0] if len(sorted_orders) > 0 else None
+            if first_order is not None:
+                self.handle_order(order=first_order, ohlc=ohlc)
 
-            # set the remaining order's filled_timestamp to None
-            for order in sorted_orders[1:]:
-                order.filled_timestamp = None
+                # set the remaining order's filled_timestamp to None
+                for order in sorted_orders[1:]:
+                    order.filled_timestamp = None
 
 
 class BracketPosition(Position):

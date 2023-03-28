@@ -2,14 +2,26 @@ import math
 from typing import Union
 
 import pandas as pd
+from loguru import logger
+
+
+class EndOfData(Exception):
+    pass
+
 
 # eventually create a base series and have different types of series
 class Series:
-    def __init__(self, data: Union[list, pd.Series]):
+    def __init__(self, data: Union[list, pd.Series], name: str = None):
         self._loop_index = 0
         self._data = data
+        self.name = name
 
     def advance_index(self):
+        if self._loop_index + 1 == len(self._data):
+            raise EndOfData(
+                f'End of data reached ({self.name}). Index: {self._loop_index}, Length: {len(self._data)}, Data:'
+                f' {self._data[-5:]}'
+            )
         self._loop_index += 1
 
     def as_list(self):
@@ -34,17 +46,19 @@ class Series:
             return self._data.iloc[item]
 
     def __float__(self):
-        if isinstance(self._data, list):
-            return self._data[self._loop_index]
-        if isinstance(self._data, pd.Series):
-            return self._data.iloc[self._loop_index]
+        try:
+            if isinstance(self._data, list):
+                return self._data[self._loop_index]
+            if isinstance(self._data, pd.Series):
+                return self._data.iloc[self._loop_index]
+        except IndexError:
+            logger.error(f'Index out of range. Index: {self._loop_index}, Length: {len(self._data)}')
 
     def shift(self, n=1):
         if isinstance(self._data, list):
             return self._data[self._loop_index - n]
         if isinstance(self._data, pd.Series):
             return self._data.iloc[self._loop_index - n]
-
 
     def __int__(self):
         return int(float(self))

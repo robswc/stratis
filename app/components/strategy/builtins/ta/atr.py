@@ -28,4 +28,7 @@ def atr(high: Series, low: Series, close: Series, period: int = 12) -> Series:
         average = np.mean(true_range[i - period: i])
         result.append(average)
 
+    # ensure atr is the same length as the input lists
+    result = [np.nan] * (len(high) - len(result)) + result
+
     return Series(result)
