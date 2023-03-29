@@ -162,12 +162,15 @@ class BaseStrategy:
             getattr(self, method)()
 
         # run step methods
+
+        series = self._get_all_series_data()
+
         for i in range(len(self.data.dataframe)):
             for method in self._step_methods:
                 getattr(self, method)()
 
             # advance the index of all series
-            for s in self._get_all_series_data():
+            for s in series:
                 s.advance_index()
 
             # advance the index of the data

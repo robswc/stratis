@@ -3,11 +3,16 @@ from typing import Union
 
 import pandas as pd
 
+
 # eventually create a base series and have different types of series
 class Series:
     def __init__(self, data: Union[list, pd.Series]):
         self._loop_index = 0
         self._data = data
+        self._index_func = {
+            list: lambda: data[self._loop_index],
+            pd.Series: lambda: data.iat[self._loop_index]
+        }[type(self._data)]
 
     def advance_index(self):
         self._loop_index += 1
@@ -31,20 +36,16 @@ class Series:
         if isinstance(self._data, list):
             return self._data[item]
         if isinstance(self._data, pd.Series):
-            return self._data.iloc[item]
+            return self._data.iat[item]
 
     def __float__(self):
-        if isinstance(self._data, list):
-            return self._data[self._loop_index]
-        if isinstance(self._data, pd.Series):
-            return self._data.iloc[self._loop_index]
+        return float(self._index_func())
 
     def shift(self, n=1):
         if isinstance(self._data, list):
             return self._data[self._loop_index - n]
         if isinstance(self._data, pd.Series):
-            return self._data.iloc[self._loop_index - n]
-
+            return self._data.iat[self._loop_index - n]
 
     def __int__(self):
         return int(float(self))
@@ -71,7 +72,7 @@ class Series:
         return float(self) ** other
 
     def __lt__(self, other):
-        return float(self) < other
+        return float(self) < float(other)
 
     def __le__(self, other):
         return float(self) <= other
@@ -83,7 +84,7 @@ class Series:
         return float(self) != other
 
     def __gt__(self, other):
-        return float(self) > other
+        return float(self) > float(other)
 
     def __ge__(self, other):
         return float(self) >= other
