@@ -1,6 +1,7 @@
 import hashlib
 from typing import Optional, List, Union
 
+import pandas as pd
 from loguru import logger
 from pydantic import BaseModel
 
@@ -84,38 +85,50 @@ class Position(BaseModel):
         self.size += order.qty
 
     def _fill_order(self, order: Union[Order, StopOrder, LimitOrder], ohlc: 'OHLC' = None):
-        """Handles TBD orders.  Sets the timestamp and fills the order if it was filled."""
+        """Handles TBD orders. Sets the timestamp and fills the order if it was filled."""
         start_index = ohlc.index.get_loc(self.orders[0].timestamp)
         df = ohlc.dataframe.iloc[start_index + 1:]
-        # loop through the df
-        for index, row in df.iterrows():
-            # handle stops
-            if order.type == 'stop':
-                if self.side == 'buy' and row.low <= order.stop_price:
-                    order.filled_timestamp = index
-                    order.filled_avg_price = order.stop_price
-                    break
-                if self.side == 'sell' and row.high >= order.stop_price:
-                    order.filled_timestamp = index
-                    order.filled_avg_price = order.stop_price
-                    break
-            # handle limits
-            if order.type == 'limit':
-                if self.side == 'buy' and row.high >= order.limit_price:
-                    order.filled_timestamp = index
-                    order.filled_avg_price = order.limit_price
-                    break
-                if self.side == 'sell' and row.low <= order.limit_price:
-                    order.filled_timestamp = index
-                    order.filled_avg_price = order.limit_price
-                    break
 
-        # if the order is still missing a timestamp, it was never filled
-        if order.filled_timestamp is None:
-            logger.warning(f'Order {order.id} was never filled')
-            return
+        if order.type == 'stop':
+            filled_order = self._process_stop_order(order, df)
+        elif order.type == 'limit':
+            filled_order = self._process_limit_order(order, df)
+
+        if filled_order is None:
+            self._handle_unfilled_order(order)
         else:
             order.timestamp = order.filled_timestamp
+
+    def _process_stop_order(self, order, df: pd.DataFrame):
+        condition = (df.low <= order.stop_price) if self.side == 'buy' else (df.high >= order.stop_price)
+        filtered_df = df[condition]
+
+        if not filtered_df.empty:
+            filled_row = filtered_df.iloc[0]
+            order.filled_timestamp = filled_row.name
+            order.filled_avg_price = order.stop_price
+            return order
+        return None
+
+    def _process_limit_order(self, order, df: pd.DataFrame):
+        condition = (df.high >= order.limit_price) if self.side == 'buy' else (df.low <= order.limit_price)
+        filtered_df = df[condition]
+
+        if not filtered_df.empty:
+            filled_row = filtered_df.iloc[0]
+            order.filled_timestamp = filled_row.name
+            order.filled_avg_price = order.limit_price
+            return order
+        return None
+
+    def _handle_unfilled_order(self, order):
+        logger.warning(f'Order {order.get_id()} was never filled')
+        logger.warning(f'{self}')
+        for order in self.orders:
+            logger.warning(f'\t{order}')
+        # set order did not fill to true
+        order.did_not_fill = True
+        return
 
     def handle_order(self, order: Union[Order, StopOrder, LimitOrder], ohlc: 'OHLC' = None):
 
