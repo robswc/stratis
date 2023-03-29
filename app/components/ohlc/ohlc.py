@@ -77,7 +77,7 @@ class OHLC:
         if index is None:
             index = self._index
         try:
-            value = self.dataframe[column].iloc[index]
+            value = self.dataframe[column].iat[index]
         except IndexError:
             logger.error(f'Index out of range. Index: {index}, Length: {len(self.dataframe)}')
             value = None
