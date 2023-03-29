@@ -29,6 +29,7 @@ class Order(BaseModel):
     client_order_id: Optional[str]
     filled_avg_price: Optional[float]
     filled_timestamp: Optional[int]
+    did_not_fill: Optional[bool] = False
 
     @staticmethod
     def create_market_order(symbol: str, qty: float, side: OrderSide):
