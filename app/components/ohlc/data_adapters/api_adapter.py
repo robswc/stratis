@@ -24,7 +24,7 @@ class APIDataAdapter(DataAdapter):
             raise Exception('DATA_API_URL not set')
 
         # you will have to modify this to get the data from the API, this is just an example
-        r = requests.get(f'{self.url}/data/{symbol}/ohlc/5?only_completed=true')
+        r = requests.get(f'{self.url}/data/{symbol}/ohlc/5?only_completed=true&days_back=30')
         r.raise_for_status()
         candles = r.json().get('candles', [])
 
