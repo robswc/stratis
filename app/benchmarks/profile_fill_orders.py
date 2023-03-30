@@ -7,3 +7,5 @@ ohlc = adapter.get_data(path='../tests/data/AAPL.csv')
 
 strategy = SMACrossOverAdvanced()
 strategy.run(ohlc)
+
+# 600ms

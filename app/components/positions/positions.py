@@ -8,6 +8,25 @@ from pydantic import BaseModel
 from components.orders.order import Order, StopOrder, LimitOrder
 from components.positions.enums import PositionEffect
 from components.positions.exceptions import PositionUnbalancedException, PositionClosedException
+from components.positions.utils import get_effect
+
+
+def binary_search(df, target, is_buy):
+    low, high = 0, len(df) - 1
+
+    while low <= high:
+        mid = (low + high) // 2
+        mid_value = df.iloc[mid]
+
+        if (is_buy and mid_value.low <= target) or (not is_buy and mid_value.high >= target):
+            if mid == 0 or (is_buy and df.iloc[mid - 1].low > target) or (
+                    not is_buy and df.iloc[mid - 1].high < target):
+                return mid
+            high = mid - 1
+        else:
+            low = mid + 1
+
+    return None
 
 
 class Position(BaseModel):
@@ -35,22 +54,6 @@ class Position(BaseModel):
                f'{self.average_exit_price} \t pnl:{round(self.pnl, 2)} (opn:' \
                f' {self.opened_timestamp}, cls: {self.closed_timestamp})'
 
-    def _get_id(self):
-        """Get the id of the position."""
-        order_ids = [o.id for o in self.orders]
-        return hashlib.md5(str(order_ids).encode()).hexdigest()
-
-    def _get_effect(self, order: Order):
-        """Get the effect of an order on a position."""
-        if abs(self.size) < abs(self.size + order.qty):
-            return PositionEffect.ADD
-        else:
-            return PositionEffect.REDUCE
-
-    def _get_root_side_orders(self):
-        """Get the root side orders of the position."""
-        return [o for o in self.orders if o.side == self.side]
-
     def get_size(self):
         """Get the size of all orders in the position."""
         return sum([o.qty for o in self.orders])
@@ -60,6 +63,15 @@ class Position(BaseModel):
         if self.side is None:
             return self.orders[0].side
         return self.side
+
+    def _get_id(self):
+        """Get the id of the position."""
+        order_ids = [o.id for o in self.orders]
+        return hashlib.md5(str(order_ids).encode()).hexdigest()
+
+    def _get_root_side_orders(self):
+        """Get the root side orders of the position."""
+        return [o for o in self.orders if o.side == self.side]
 
     def _update_average_entry(self, order: Order):
         if self.average_exit_price:
@@ -104,8 +116,7 @@ class Position(BaseModel):
         filtered_df = df[condition]
 
         if not filtered_df.empty:
-            filled_row = filtered_df.iloc[0]
-            order.filled_timestamp = filled_row.name
+            order.filled_timestamp = filtered_df.index[0]
             order.filled_avg_price = order.stop_price
             return order
         return None
@@ -115,8 +126,7 @@ class Position(BaseModel):
         filtered_df = df[condition]
 
         if not filtered_df.empty:
-            filled_row = filtered_df.iloc[0]
-            order.filled_timestamp = filled_row.name
+            order.filled_timestamp = filtered_df.index[0]
             order.filled_avg_price = order.limit_price
             return order
         return None
@@ -145,7 +155,7 @@ class Position(BaseModel):
             self.side = order.side
 
         # gets the position effect, either add or reduce
-        effect = self._get_effect(order)
+        effect = get_effect(position=self, order=order)
 
         if effect == PositionEffect.ADD:
             # since the position is added, we need to calculate the cost basis
