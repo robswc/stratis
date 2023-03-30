@@ -1,5 +1,6 @@
 from components.orders.order import Order
 from components.orders.enums import OrderSide as Side
+from components.positions.enums import PositionEffect
 from components.positions.exceptions import PositionClosedException
 
 
@@ -26,3 +27,11 @@ def show_details(position: 'Position'):
     print('Position:', position)
     for order in position.orders:
         print('\tOrder:', order)
+
+
+def get_effect(position: 'Position', order: Order):
+    """Get the effect of an order on a position."""
+    if abs(position.size) < abs(position.size + order.qty):
+        return PositionEffect.ADD
+    else:
+        return PositionEffect.REDUCE

@@ -13,6 +13,10 @@ class Series:
             list: lambda: data[self._loop_index],
             pd.Series: lambda: data.iat[self._loop_index]
         }[type(self._data)]
+        self._shift_func = {
+            list: lambda n: data[self._loop_index - n],
+            pd.Series: lambda n: data.iat[self._loop_index - n]
+        }[type(self._data)]
 
     def advance_index(self):
         self._loop_index += 1
@@ -42,10 +46,7 @@ class Series:
         return float(self._index_func())
 
     def shift(self, n=1):
-        if isinstance(self._data, list):
-            return self._data[self._loop_index - n]
-        if isinstance(self._data, pd.Series):
-            return self._data.iat[self._loop_index - n]
+        return float(self._shift_func(n))
 
     def __int__(self):
         return int(float(self))
