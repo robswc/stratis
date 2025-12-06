@@ -39,7 +39,7 @@ starlette==0.20.4
 tomli==2.0.1
 typer==0.7.0
 typing_extensions==4.3.0
-urllib3==1.26.12
+urllib3==2.6.0
 uvicorn==0.18.3
 uvloop==0.17.0
 watchfiles==0.17.0
